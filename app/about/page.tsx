@@ -7,13 +7,14 @@ import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { CtaSection } from "@/components/marketing/cta-section";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About ConsiderIQ — Research Principles & Origin",
   description:
     "Why we built ConsiderIQ: An analytical research instrument designed to measure, verify, and understand AI-mediated buying decisions.",
   alternates: {
-    canonical: "https://consideriq.com/about",
+    canonical: getCanonicalUrl("/about"),
   },
 };
 

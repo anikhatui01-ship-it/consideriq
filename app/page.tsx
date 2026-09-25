@@ -13,6 +13,10 @@ import {
   Eye,
   GitCompare,
   TrendingDown,
+  Compass,
+  Stethoscope,
+  HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import { PageShell } from "@/components/shared/page-shell";
 import { Container } from "@/components/shared/container";
@@ -23,13 +27,14 @@ import { FaqSection } from "@/components/marketing/faq";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { Badge } from "@/components/ui/badge";
 import { SoftwareAppJsonLd, OrganizationJsonLd } from "@/lib/seo/jsonld";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "ConsiderIQ — AI Buyer Journey Intelligence",
   description:
-    "See how AI buyers evaluate your brand. Simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from consideration.",
+    "See where AI recommendations include — or eliminate — your brand. ConsiderIQ models multi-step buyer scenarios to diagnose brand consideration in AI search.",
   alternates: {
-    canonical: "https://consideriq.com",
+    canonical: getCanonicalUrl("/"),
   },
 };
 
@@ -39,16 +44,97 @@ export default function HomePage() {
       <OrganizationJsonLd />
       <SoftwareAppJsonLd />
 
-      {/* 1 & 2: HERO SECTION WITH SIGNATURE DECISION TRAIL */}
+      {/* 1: HERO SECTION WITH SIGNATURE DECISION TRAIL */}
       <Hero />
 
-      {/* 3: THE PROBLEM: MENTION COUNTING VS BUYER JOURNEYS */}
+      {/* 2: CORE NARRATIVE: DISCOVER, DIAGNOSE, EXPLAIN, IMPROVE (PART 5) */}
       <section className="py-16 md:py-24 border-b border-border bg-surface">
         <Container size="default">
           <SectionHeading
+            badge="Intelligence Framework"
+            title="The intelligence loop behind AI buying decisions"
+            description="Traditional SEO counts isolated keyword mentions. ConsiderIQ investigates how iterative buyer conversations shape recommendations."
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="rounded-xl border border-border bg-surface p-6 space-y-3 shadow-subtle flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="rounded-lg bg-blue-50 dark:bg-blue-950/40 p-2.5 w-fit text-primary">
+                  <Compass className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <span className="font-mono text-xs text-primary font-semibold uppercase tracking-wider">
+                  01 · Discover
+                </span>
+                <h3 className="text-base font-semibold text-foreground">
+                  Where does your brand appear?
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Identify if your brand enters initial consideration when buyers express general category needs without mentioning specific vendors.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-6 space-y-3 shadow-subtle flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-2.5 w-fit text-amber-600 dark:text-amber-400">
+                  <Stethoscope className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <span className="font-mono text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider">
+                  02 · Diagnose
+                </span>
+                <h3 className="text-base font-semibold text-foreground">
+                  Where do you get eliminated?
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Pinpoint the exact conversational turn where your brand disappears as the buyer introduces compliance, budget, or architectural filters.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-6 space-y-3 shadow-subtle flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/40 p-2.5 w-fit text-emerald-600 dark:text-emerald-400">
+                  <HelpCircle className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider">
+                  03 · Explain
+                </span>
+                <h3 className="text-base font-semibold text-foreground">
+                  What drove the decision?
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Trace the AI provider&apos;s output to observed source references to understand which specifications or gaps influenced the model&apos;s response.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-6 space-y-3 shadow-subtle flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="rounded-lg bg-muted p-2.5 w-fit text-foreground">
+                  <Sparkles className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <span className="font-mono text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  04 · Improve
+                </span>
+                <h3 className="text-base font-semibold text-foreground">
+                  What should your team investigate?
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Turn diagnostic evidence into clear documentation, positioning, and content priorities before competitors capture prospective buyers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* 3: THE PROBLEM: MENTION COUNTING VS BUYER JOURNEYS */}
+      <section className="py-16 md:py-24 border-b border-border bg-surface-elevated/20">
+        <Container size="default">
+          <SectionHeading
             badge="The Problem"
-            title="Mention counting misses the actual decision."
-            description="Traditional AI search trackers tell you if your brand was mentioned in a single query. Real B2B buyers don't buy after one question—they test constraints, compare alternatives, and eliminate options."
+            title="Single-prompt mention counting misses the actual decision."
+            description="Standard AI tracking tools count whether your name appears in a single prompt. Real B2B buyers don't buy after one question—they test constraints, compare alternatives, and eliminate options."
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
@@ -56,7 +142,7 @@ export default function HomePage() {
             <div className="rounded-xl border border-rose-200/80 bg-rose-50/30 dark:bg-rose-950/10 dark:border-rose-900/60 p-6 sm:p-7 space-y-4">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-800 text-[11px] font-mono">
-                  Traditional AI SEO Tracker
+                  Traditional Keyword Tracker
                 </Badge>
                 <XCircle className="h-5 w-5 text-rose-500" aria-hidden="true" />
               </div>
@@ -86,12 +172,12 @@ export default function HomePage() {
             </div>
 
             {/* The ConsiderIQ Way */}
-            <div className="rounded-xl border border-border bg-surface-elevated p-6 sm:p-7 space-y-4 shadow-subtle ring-1 ring-border">
+            <div className="rounded-xl border border-border bg-surface p-6 sm:p-7 space-y-4 shadow-subtle ring-1 ring-border">
               <div className="flex items-center justify-between">
                 <Badge variant="accent" className="text-[11px] font-mono">
                   ConsiderIQ Approach
                 </Badge>
-                <CheckCircle2 className="h-5 w-5 text-accent" aria-hidden="true" />
+                <CheckCircle2 className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
 
               <h3 className="text-lg font-semibold text-foreground">
@@ -99,7 +185,7 @@ export default function HomePage() {
               </h3>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Simulates the progressive procurement conversation: discovery, constraints, shortlist, elimination, and final vendor selection.
+                Simulates progressive procurement conversations: discovery, constraints, shortlist, elimination, and final vendor recommendation.
               </p>
 
               <div className="space-y-2 pt-2 border-t border-border text-xs text-muted-foreground">
@@ -113,7 +199,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Preserves raw provider outputs so every insight is verifiable.</span>
+                  <span>Preserves raw provider outputs so every insight is inspectable.</span>
                 </div>
               </div>
             </div>
@@ -121,8 +207,8 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* 4: THE PRODUCT CONCEPT (DECISION FUNNEL PATHWAY) */}
-      <section className="py-16 md:py-24 border-b border-border bg-surface-elevated/30">
+      {/* 4: THE FIVE PHASES OF AN AI BUYING DECISION */}
+      <section className="py-16 md:py-24 border-b border-border bg-surface">
         <Container size="default">
           <SectionHeading
             badge="Architecture"
@@ -159,7 +245,7 @@ export default function HomePage() {
               {
                 step: "05",
                 stage: "Recommendation",
-                desc: "The AI delivers its final chosen vendor pilot pick and rationale.",
+                desc: "The AI delivers its final chosen vendor recommendation and rationale.",
                 icon: Bot,
               },
             ].map((item, idx) => {
@@ -174,7 +260,7 @@ export default function HomePage() {
                       <span className="font-mono text-xs text-muted-foreground font-semibold">
                         {item.step}
                       </span>
-                      <Icon className="h-4 w-4 text-accent" />
+                      <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <h4 className="text-base font-semibold text-foreground tracking-tight">
                       {item.stage}
@@ -190,13 +276,13 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* 5: HOW IT WORKS */}
-      <section className="py-16 md:py-24 border-b border-border bg-surface" id="how-it-works">
+      {/* 5: HOW IT WORKS: WORKFLOW OVERVIEW (TRUTHFUL STATUS) */}
+      <section className="py-16 md:py-24 border-b border-border bg-surface-elevated/20" id="how-it-works">
         <Container size="default">
           <SectionHeading
-            badge="Workflow"
-            title="How ConsiderIQ simulates buyer journeys"
-            description="Four systematic steps to measure how AI recommendation engines perceive and recommend your software."
+            badge="Methodology"
+            title="How ConsiderIQ models buyer journeys"
+            description="Four systematic phases to model how AI recommendation systems perceive and evaluate software."
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -227,12 +313,12 @@ export default function HomePage() {
             <FeatureBlock
               icon={Bot}
               badge="Step 3"
-              title="Run AI Simulations"
-              description="Execute real multi-turn conversations against leading AI models (Google Gemini, OpenAI, Claude)."
+              title="Multi-Turn Simulation"
+              description="Simulate multi-turn conversations designed around leading models (Google Gemini, OpenAI, Claude) with full token transcript logging."
               details={[
-                "Live API runs with exact tokens stored",
-                "Zero mock outputs or fabricated data",
-                "Repeated runs to reveal model variability",
+                "Structured multi-turn query trees",
+                "Strict evidence classification standards",
+                "Analysis of model response variation",
               ]}
             />
 
@@ -242,17 +328,17 @@ export default function HomePage() {
               title="Inspect Decision Shifts"
               description="Pinpoint the exact turn where your brand dropped, which competitor survived, and what source citations drove the choice."
               details={[
-                "Visual DecisionTrail progression",
+                "Visual Decision Trail progression",
                 "Clear elimination moment diagnosis",
-                "Evidence Drawer citation inspection",
+                "Evidence Drawer source inspection",
               ]}
             />
           </div>
         </Container>
       </section>
 
-      {/* 6: PRODUCT PREVIEW (ELEGANT STATIC INTERFACE PREVIEW) */}
-      <section className="py-16 md:py-24 border-b border-border bg-surface-elevated/40">
+      {/* 6: ILLUSTRATIVE INTERFACE PREVIEW (CLEARLY LABELED EXAMPLE) */}
+      <section className="py-16 md:py-24 border-b border-border bg-surface">
         <Container size="wide">
           <div className="max-w-4xl mx-auto space-y-6">
             <SectionHeading
@@ -269,10 +355,10 @@ export default function HomePage() {
                   <span className="h-2.5 w-2.5 rounded-full bg-border" />
                   <span className="h-2.5 w-2.5 rounded-full bg-border" />
                   <span className="h-2.5 w-2.5 rounded-full bg-border" />
-                  <span className="text-muted-foreground ml-2">consideriq.internal / simulations / run-842</span>
+                  <span className="text-muted-foreground ml-2">consideriq.internal / research / example-scenario</span>
                 </div>
                 <Badge variant="outline" className="text-[10px] bg-surface">
-                  Illustrative UI preview
+                  Illustrative Research Preview
                 </Badge>
               </div>
 
@@ -282,13 +368,13 @@ export default function HomePage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
                   <div>
                     <span className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
-                      Simulation Finding · 10 Run Sample
+                      Illustrative Finding · Example Scenario Analysis
                     </span>
                     <h3 className="text-xl sm:text-2xl font-bold text-foreground mt-1">
-                      Your brand was shortlisted in 6 of 10 buyer scenarios.
+                      Your brand was shortlisted in 6 of 10 sample iterations.
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      You most often disappeared when enterprise SOC 2 and SCIM requirements were introduced.
+                      Elimination most frequently occurred when enterprise SOC 2 and SCIM constraints were introduced.
                     </p>
                   </div>
                   <div className="shrink-0 flex items-center gap-2">
@@ -305,7 +391,7 @@ export default function HomePage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <span>Funnel Survival Rate</span>
-                    <span>10 Runs Against GPT-4o & Gemini</span>
+                    <span>10 Iterations in Example Scenario</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -329,17 +415,17 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Verified Elimination Highlight */}
+                {/* Key Investigation Highlight */}
                 <div className="rounded-lg border border-border/80 bg-muted/30 p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      <ShieldCheck className="h-4 w-4 text-accent" />
+                      <ShieldCheck className="h-4 w-4 text-primary" />
                       Key Investigation Opportunity
                     </span>
                     <Badge variant="inferred">Inferred Hypothesis</Badge>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    In 4 out of 4 elimination turns, the provider cited a lack of public documentation for directory sync (SCIM). Competitors with indexed Okta/Azure AD integration guides survived into the final recommendation.
+                    In 4 out of 4 elimination turns, the model cited lack of visible documentation for directory sync (SCIM). Competitors with indexed Okta/Azure AD integration guides survived into the final recommendation.
                   </p>
                 </div>
               </div>
@@ -348,13 +434,13 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* 7: WHY THIS IS DIFFERENT (EVIDENCE-ORIENTED CONCEPTS) */}
-      <section className="py-16 md:py-24 border-b border-border bg-surface" id="methodology">
+      {/* 7: METHODOLOGY & EVIDENCE CONCEPTS */}
+      <section className="py-16 md:py-24 border-b border-border bg-surface-elevated/20" id="methodology">
         <Container size="default">
           <SectionHeading
             badge="Methodology"
             title="Evidence over marketing hype"
-            description="ConsiderIQ is built on scientific research discipline. Here is how our measurement standards differ from generic SEO suites."
+            description="ConsiderIQ is built on research discipline. Here is how our measurement standards differ from generic SEO tools."
           />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -366,7 +452,7 @@ export default function HomePage() {
                 Raw Responses Remain Inspectable
               </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                We never ask you to trust a summary number blindly. Every finding traces directly to the raw, unedited provider response tokens with time stamps.
+                We never ask you to trust a summary number blindly. Findings trace directly to the unedited provider response tokens with time stamps.
               </p>
             </div>
 
@@ -378,7 +464,7 @@ export default function HomePage() {
                 Observed vs. Calculated vs. Inferred
               </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                We strictly demarcate what the AI model actually said (Observed), what our software measured (Calculated), and cautious hypotheses (Inferred).
+                We strictly demarcate what the AI model actually returned (Observed), what was measured across runs (Calculated), and cautious hypotheses (Inferred).
               </p>
             </div>
 

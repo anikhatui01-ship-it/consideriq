@@ -77,7 +77,7 @@ export function Header() {
             </Link>
             <Button asChild size="sm" className="gap-1.5 group">
               <Link href="/waitlist">
-                <span>Join the beta</span>
+                <span>Request Beta Access</span>
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>
@@ -145,7 +145,7 @@ export function Header() {
           <div className="pt-6 border-t border-border space-y-3">
             <Button asChild className="w-full justify-center gap-2 h-11 text-base">
               <Link href="/waitlist" onClick={closeMenu}>
-                <span>Join the beta</span>
+                <span>Request Beta Access</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>

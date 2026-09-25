@@ -4,13 +4,14 @@ import { PageShell } from "@/components/shared/page-shell";
 import { Container } from "@/components/shared/container";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Badge } from "@/components/ui/badge";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Review ConsiderIQ's privacy practices, data collection boundaries, AI processing policies, and data retention standards.",
   alternates: {
-    canonical: "https://consideriq.com/privacy",
+    canonical: getCanonicalUrl("/privacy"),
   },
 };
 

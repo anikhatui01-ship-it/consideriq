@@ -8,13 +8,14 @@ import { SectionHeading } from "@/components/marketing/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { DecisionTrail } from "@/components/marketing/decision-trail";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "How It Works — Simulation Methodology",
   description:
-    "Learn how ConsiderIQ models multi-turn buyer journeys, executes live AI simulations, isolates elimination points, and extracts verifiable evidence.",
+    "Learn how ConsiderIQ models multi-turn buyer journeys, evaluates decision shifts, isolates elimination points, and extracts verifiable evidence.",
   alternates: {
-    canonical: "https://consideriq.com/how-it-works",
+    canonical: getCanonicalUrl("/how-it-works"),
   },
 };
 
@@ -118,36 +119,36 @@ export default function HowItWorksPage() {
             {/* STEP 3 */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start border-t border-border/80 pt-16">
               <div className="md:col-span-4 space-y-2">
-                <span className="font-mono text-xs uppercase tracking-wider text-accent font-semibold">
-                  Phase 03 · Live AI Simulation
+                <span className="font-mono text-xs uppercase tracking-wider text-primary font-semibold">
+                  Phase 03 · Simulation Modeling
                 </span>
                 <h2 className="text-2xl font-bold text-foreground">
-                  Execute Real AI Simulations
+                  Multi-Turn Simulation Design
                 </h2>
                 <div className="rounded-lg bg-muted/60 p-4 border border-border text-xs text-muted-foreground space-y-2">
-                  <span className="font-semibold text-foreground block">Zero synthetic mock data:</span>
+                  <span className="font-semibold text-foreground block">Planned provider execution:</span>
                   <p>
-                    Every simulation turn executes against live provider APIs. We never simulate success if a provider is unavailable.
+                    The simulation engine is architected to run structured multi-turn conversation trees across leading models (Google Gemini, OpenAI, Claude). During this Private Research Beta, we test and calibrate prompt sequences with cohort participants.
                   </p>
                 </div>
               </div>
 
               <div className="md:col-span-8 space-y-4 text-sm text-muted-foreground leading-relaxed">
                 <p>
-                  Scenarios are executed across standard enterprise models including Google Gemini, OpenAI GPT-4o, and Anthropic Claude:
+                  Scenarios are structured to model iterative buyer prompts and test response consistency:
                 </p>
                 <ul className="space-y-2 text-xs sm:text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Immutable Logs:</strong> Exact prompt strings and verbatim provider response payloads are cryptographically hashed and saved.</span>
+                    <span><strong>Verbatim Outputs:</strong> Designed to store unedited provider responses and extracted reference citations without modification.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Run Repeatability:</strong> Scenarios are run repeatedly (default 10 iterations) to quantify model output variance.</span>
+                    <span><strong>Turn-by-Turn Tracking:</strong> Evaluates retention and elimination at each specific requirement change.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Classification Engine:</strong> Evaluates which brands were discovered, shortlisted, eliminated, or crowned as final recommendations.</span>
+                    <span><strong>Classification Standards:</strong> Explicitly categorizes findings into Observed text, Calculated rates, and Inferred hypotheses.</span>
                   </li>
                 </ul>
               </div>

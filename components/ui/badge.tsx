@@ -28,7 +28,7 @@ const badgeVariants = cva(
         calculated:
           "border-blue-200 bg-blue-50 text-blue-700 uppercase tracking-wider text-[10px] font-semibold dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
         inferred:
-          "border-purple-200 bg-purple-50 text-purple-700 uppercase tracking-wider text-[10px] font-semibold dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800",
+          "border-amber-300/80 bg-amber-50 text-amber-900 uppercase tracking-wider text-[10px] font-semibold dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
       },
     },
     defaultVariants: {

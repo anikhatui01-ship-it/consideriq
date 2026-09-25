@@ -7,13 +7,14 @@ import { Container } from "@/components/shared/container";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing & Beta Access",
   description:
-    "Transparent pricing and beta access terms. During our preview phase, ConsiderIQ is free and invite-only for participating research partners.",
+    "ConsiderIQ is currently in Private Research Beta. Access is free for participating research partners while we validate our simulation workflow.",
   alternates: {
-    canonical: "https://consideriq.com/pricing",
+    canonical: getCanonicalUrl("/pricing"),
   },
 };
 
@@ -26,13 +27,13 @@ export default function PricingPage() {
           <Breadcrumb items={[{ label: "Pricing" }]} className="mb-4" />
           <div className="max-w-3xl space-y-4">
             <Badge variant="outline" className="text-xs font-mono">
-              Transparent Access Model
+              Private Research Beta
             </Badge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Free during the private beta preview.
+              Early access while we validate the research workflow.
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              We are currently in private beta (v0.2). Access is invite-only while we refine simulation repeatability and multi-provider models with select software founders and marketers.
+              ConsiderIQ is free during our private research beta. We are onboarding software founders, marketers, and SEO/GEO practitioners in rolling cohorts to test buyer journey simulation repeatability.
             </p>
           </div>
         </Container>
@@ -43,7 +44,7 @@ export default function PricingPage() {
         <Container size="default">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
             {/* CURRENT BETA TIER */}
-            <div className="rounded-xl border-2 border-accent bg-surface p-7 sm:p-8 shadow-subtle flex flex-col justify-between space-y-6 relative">
+            <div className="rounded-xl border-2 border-primary bg-surface p-7 sm:p-8 shadow-subtle flex flex-col justify-between space-y-6 relative">
               <div className="absolute -top-3 left-6">
                 <Badge variant="accent" className="text-xs px-2.5 py-0.5">
                   Current Availability
@@ -53,10 +54,10 @@ export default function PricingPage() {
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-foreground">
-                    Research Beta
+                    Private Research Beta
                   </h2>
                   <span className="text-xs font-mono text-muted-foreground uppercase">
-                    Invite-Only
+                    Rolling Cohorts
                   </span>
                 </div>
 
@@ -65,12 +66,12 @@ export default function PricingPage() {
                     $0
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    / during preview period
+                    / during research validation period
                   </span>
                 </div>
 
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Full access to core simulation workflows for software founders and growth teams participating in our initial research cohorts.
+                  Full participation in core simulation workflows and diagnostic analysis for teams in our early research cohorts.
                 </p>
 
                 <div className="pt-4 border-t border-border space-y-2.5">
@@ -80,7 +81,7 @@ export default function PricingPage() {
                   <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>1 Brand project profile with public website indexing</span>
+                      <span>1 Brand project profile with public domain evaluation</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -88,19 +89,19 @@ export default function PricingPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>10-Scenario multi-turn simulation batches</span>
+                      <span>Multi-turn scenario simulation batches</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Interactive Decision Trail™ visualization</span>
+                      <span>Interactive Decision Trail visualization</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Evidence Drawer with raw response inspectability</span>
+                      <span>Evidence Drawer with verbatim transcript inspectability</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Direct feedback channel with founding engineers</span>
+                      <span>Direct feedback channel with the research team</span>
                     </li>
                   </ul>
                 </div>
@@ -109,12 +110,12 @@ export default function PricingPage() {
               <div className="pt-4 border-t border-border">
                 <Button asChild size="lg" className="w-full gap-2 text-base h-11">
                   <Link href="/waitlist">
-                    <span>Request Beta Invitation</span>
+                    <span>Request Beta Access</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground mt-2">
-                  No credit card required. Rolling admissions.
+                  No credit card required. Free during research preview.
                 </p>
               </div>
             </div>
@@ -124,24 +125,24 @@ export default function PricingPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-foreground">
-                    ConsiderIQ Pro
+                    Future Commercial Plans
                   </h2>
                   <Badge variant="outline" className="text-xs font-mono">
-                    Planned v1.0
+                    Post-Beta
                   </Badge>
                 </div>
 
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold text-foreground tracking-tight">
-                    Post-Beta Pricing
+                    To be announced
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    announced prior to general availability
+                    after the research beta
                   </span>
                 </div>
 
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Continuous AI buyer journey intelligence designed for growth teams managing recurring competitive brand research.
+                  Commercial plans will be announced after the research beta. Continuous monitoring and multi-provider simulation tooling will be offered to growth teams.
                 </p>
 
                 <div className="pt-4 border-t border-border space-y-2.5">
@@ -155,11 +156,7 @@ export default function PricingPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <span>Simulations across 3+ simultaneous AI providers</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <span>Weekly automated consideration tracking sweeps</span>
+                      <span>Comparative evaluations across multiple AI providers</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -176,11 +173,11 @@ export default function PricingPage() {
               <div className="pt-4 border-t border-border">
                 <Button asChild variant="outline" size="lg" className="w-full text-base h-11">
                   <Link href="/waitlist">
-                    Join Waiting List for Pro
+                    Request Beta Access
                   </Link>
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground mt-2">
-                  Beta members will receive grandfathered transition terms.
+                  Research beta participants will receive priority access to future plans.
                 </p>
               </div>
             </div>
@@ -189,21 +186,21 @@ export default function PricingPage() {
           {/* Pricing FAQ & Policy */}
           <div className="mt-16 max-w-3xl mx-auto rounded-lg border border-border bg-surface p-6 space-y-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-              <Info className="h-4 w-4 text-accent" />
+              <Info className="h-4 w-4 text-primary" />
               Frequently Asked Pricing Questions
             </div>
             <div className="space-y-3">
               <div>
                 <strong className="text-foreground block">Why is ConsiderIQ free during the beta?</strong>
-                Our primary goal during beta v0.2 is scientific validation and customer feedback. We want to work closely with early users to refine buyer scenario prompts and ensure simulation findings deliver direct diagnostic value.
+                Our primary goal during the Private Research Beta is workflow validation and direct participant feedback. We work closely with early users to calibrate buyer persona parameters and ensure decision trail insights provide clear diagnostic value.
               </div>
               <div>
                 <strong className="text-foreground block">Will I be charged unexpectedly?</strong>
-                Never. We do not collect payment credentials during the beta phase. If and when commercial plans are introduced, you will have ample advance notice and the option to opt in.
+                Never. We do not collect credit cards or payment credentials during the research beta. When commercial plans are announced in the future, participation will be strictly opt-in.
               </div>
               <div>
                 <strong className="text-foreground block">Who pays for the underlying AI provider API tokens?</strong>
-                During the private beta preview, ConsiderIQ covers the underlying API provider costs for approved research runs within standard usage limits.
+                During the private research beta, ConsiderIQ covers the underlying API provider costs for approved research cohort evaluations.
               </div>
             </div>
           </div>

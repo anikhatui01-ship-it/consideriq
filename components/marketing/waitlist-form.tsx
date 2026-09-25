@@ -2,46 +2,103 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight, Info } from "lucide-react";
+import { CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function WaitlistForm() {
   const [formData, setFormData] = React.useState({
-    name: "",
     email: "",
-    company: "",
+    company_website: "",
     role: "",
-    website: "",
-    goal: "",
+    research_question: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [submittedEmail, setSubmittedEmail] = React.useState("");
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [serverError, setServerError] = React.useState<string | null>(null);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Full name is required";
-    if (!formData.email.trim()) {
+
+    const trimmedEmail = formData.email.trim();
+    if (!trimmedEmail) {
       newErrors.email = "Work email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       newErrors.email = "Please enter a valid work email address";
     }
-    if (!formData.company.trim()) newErrors.company = "Company name is required";
-    if (!formData.role.trim()) newErrors.role = "Role is required";
+
+    const trimmedWebsite = formData.company_website.trim();
+    if (!trimmedWebsite) {
+      newErrors.company_website = "Company website is required";
+    } else {
+      // Basic client check: needs a dot or protocol
+      const withProtocol = /^https?:\/\//i.test(trimmedWebsite)
+        ? trimmedWebsite
+        : `https://${trimmedWebsite}`;
+      try {
+        const parsed = new URL(withProtocol);
+        if (!parsed.hostname.includes(".") || parsed.hostname.length < 3) {
+          newErrors.company_website = "Please enter a valid website URL (e.g. acme.com)";
+        }
+      } catch {
+        newErrors.company_website = "Please enter a valid website URL";
+      }
+    }
+
+    if (!formData.role.trim()) {
+      newErrors.role = "Role is required";
+    }
+
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setServerError(null);
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
     setErrors({});
-    // Truthful demonstration state: we do not fake database storage
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          company_website: formData.company_website.trim(),
+          role: formData.role.trim(),
+          research_question: formData.research_question.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setServerError(
+          data?.error || "Unable to submit your request at this moment. Please try again."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      setSubmittedEmail(formData.email.trim());
+      setSubmitted(true);
+    } catch {
+      setServerError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -50,44 +107,40 @@ export function WaitlistForm() {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-foreground">
-              Request access for your brand
+              Request Private Beta Access
             </h2>
             <p className="text-xs text-muted-foreground">
-              Fields marked with * are required for beta qualification.
+              Participate in our early research cohort to inspect your brand&apos;s AI buyer journeys.
             </p>
           </div>
 
-          {/* Name */}
-          <div className="space-y-1.5">
-            <label htmlFor="name" className="text-xs font-medium text-foreground">
-              Full Name *
-            </label>
-            <Input
-              id="name"
-              name="name"
-              placeholder="Jane Doe"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              error={!!errors.name}
-              required
-            />
-            {errors.name && (
-              <p className="text-[11px] text-destructive">{errors.name}</p>
-            )}
-          </div>
+          {serverError && (
+            <div
+              className="rounded-md border border-rose-200 bg-rose-50/70 dark:bg-rose-950/40 dark:border-rose-900 p-3 text-xs text-rose-800 dark:text-rose-200 flex items-start gap-2 animate-in fade-in-0"
+              role="alert"
+            >
+              <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+              <span>{serverError}</span>
+            </div>
+          )}
 
           {/* Work Email */}
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-xs font-medium text-foreground">
-              Work Email *
+              Work Email <span className="text-rose-500">*</span>
             </label>
             <Input
               id="email"
               name="email"
               type="email"
+              autoComplete="email"
               placeholder="jane@company.com"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={isSubmitting}
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                if (errors.email) setErrors({ ...errors, email: "" });
+              }}
               error={!!errors.email}
               required
             />
@@ -96,36 +149,47 @@ export function WaitlistForm() {
             )}
           </div>
 
-          {/* Company & Role */}
+          {/* Company Website & Role */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="company" className="text-xs font-medium text-foreground">
-                Company *
+              <label htmlFor="company_website" className="text-xs font-medium text-foreground">
+                Company Website <span className="text-rose-500">*</span>
               </label>
               <Input
-                id="company"
-                name="company"
-                placeholder="Acme Inc."
-                value={formData.company}
-                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                error={!!errors.company}
+                id="company_website"
+                name="company_website"
+                type="text"
+                autoComplete="url"
+                placeholder="company.com"
+                value={formData.company_website}
+                disabled={isSubmitting}
+                onChange={(e) => {
+                  setFormData({ ...formData, company_website: e.target.value });
+                  if (errors.company_website) setErrors({ ...errors, company_website: "" });
+                }}
+                error={!!errors.company_website}
                 required
               />
-              {errors.company && (
-                <p className="text-[11px] text-destructive">{errors.company}</p>
+              {errors.company_website && (
+                <p className="text-[11px] text-destructive">{errors.company_website}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="role" className="text-xs font-medium text-foreground">
-                Role *
+                Your Role <span className="text-rose-500">*</span>
               </label>
               <Input
                 id="role"
                 name="role"
-                placeholder="Founder, Head of Growth, etc."
+                type="text"
+                placeholder="Founder, Head of Marketing, etc."
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                disabled={isSubmitting}
+                onChange={(e) => {
+                  setFormData({ ...formData, role: e.target.value });
+                  if (errors.role) setErrors({ ...errors, role: "" });
+                }}
                 error={!!errors.role}
                 required
               />
@@ -135,54 +199,54 @@ export function WaitlistForm() {
             </div>
           </div>
 
-          {/* Optional Website */}
+          {/* Optional Research Question */}
           <div className="space-y-1.5">
-            <label htmlFor="website" className="text-xs font-medium text-foreground flex items-center justify-between">
-              <span>Brand Website</span>
-              <span className="text-[11px] text-muted-foreground font-normal">Optional</span>
-            </label>
-            <Input
-              id="website"
-              name="website"
-              type="url"
-              placeholder="https://company.com"
-              value={formData.website}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-            />
-          </div>
-
-          {/* Optional Learning Goal */}
-          <div className="space-y-1.5">
-            <label htmlFor="goal" className="text-xs font-medium text-foreground flex items-center justify-between">
-              <span>What do you want to learn about your brand in AI search?</span>
+            <label
+              htmlFor="research_question"
+              className="text-xs font-medium text-foreground flex items-center justify-between"
+            >
+              <span>What question would you like to investigate?</span>
               <span className="text-[11px] text-muted-foreground font-normal">Optional</span>
             </label>
             <textarea
-              id="goal"
-              name="goal"
+              id="research_question"
+              name="research_question"
               rows={3}
-              className="flex w-full rounded-md border border-input bg-surface px-3 py-2 text-sm text-foreground shadow-subtle transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent"
-              placeholder="e.g. Which enterprise security constraints cause buyers to eliminate us against Competitor X?"
-              value={formData.goal}
-              onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
+              disabled={isSubmitting}
+              className="flex w-full rounded-md border border-input bg-surface px-3 py-2 text-sm text-foreground shadow-subtle transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:opacity-50"
+              placeholder="e.g. Which buyer constraints cause us to be eliminated against Competitor X?"
+              value={formData.research_question}
+              onChange={(e) =>
+                setFormData({ ...formData, research_question: e.target.value })
+              }
             />
           </div>
 
           {/* Submit Button */}
           <div className="pt-2">
-            <Button type="submit" size="lg" className="w-full gap-2 text-base h-11">
-              <span>Submit Waitlist Request</span>
-              <ArrowRight className="h-4 w-4" />
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isSubmitting}
+              className="w-full gap-2 text-base h-11"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Submitting request...</span>
+                </>
+              ) : (
+                <>
+                  <span>Request Beta Access</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
 
-          {/* Truthful Milestone Notice */}
-          <div className="rounded-md border border-border/80 bg-muted/30 p-3 text-[11px] text-muted-foreground flex items-start gap-2">
-            <Info className="h-4 w-4 text-accent shrink-0 mt-0.5" />
-            <span>
-              Frontend Shell v0.2: Form fields validate cleanly. Live Supabase database storage and confirmation email dispatch will connect in Milestone v0.3.
-            </span>
-          </div>
+          <p className="text-[11px] text-center text-muted-foreground pt-1">
+            Free access during the research beta. No credit card required.
+          </p>
         </form>
       ) : (
         /* Truthful Success Feedback State */
@@ -192,33 +256,42 @@ export function WaitlistForm() {
           </div>
 
           <h3 className="text-xl font-bold text-foreground">
-            Form Validation Complete
+            Beta Request Received
           </h3>
 
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Thank you, <strong>{formData.name}</strong> ({formData.email}). Your input passed all client-side schema requirements.
+            Thank you. Your request for beta access for{" "}
+            <strong className="text-foreground">{submittedEmail}</strong> has been recorded.
           </p>
 
           <div className="rounded-lg border border-border bg-surface-elevated p-4 text-xs text-muted-foreground space-y-2">
             <strong className="text-foreground block">
-              Engineering Status Notice (Milestone v0.2):
+              What happens next:
             </strong>
             <p>
-              In adherence to our strict non-fabrication rule, this prototype does not pretend to write records to a live production database. Backend wiring (Supabase tables, RLS, and transactional emails) is scheduled for the upcoming backend milestone.
+              We onboard research participants in rolling cohorts to maintain hands-on feedback cycles. We will review your company context and reach out directly with access instructions when your cohort opens.
             </p>
           </div>
 
-          <div className="pt-2 flex gap-3">
+          <div className="pt-2 flex flex-wrap gap-3">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSubmitted(false)}
+              onClick={() => {
+                setFormData({
+                  email: "",
+                  company_website: "",
+                  role: "",
+                  research_question: "",
+                });
+                setSubmitted(false);
+              }}
             >
-              Reset Form
+              Submit Another Request
             </Button>
             <Button asChild size="sm">
               <Link href="/how-it-works">
-                Read Methodology
+                Explore Our Methodology
               </Link>
             </Button>
           </div>

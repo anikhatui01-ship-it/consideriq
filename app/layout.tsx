@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { getSiteUrl, SITE_CONFIG } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,13 +10,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://consideriq.com"),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "ConsiderIQ — AI Buyer Journey Intelligence",
     template: "%s | ConsiderIQ",
   },
   description:
-    "See how AI buyers evaluate your brand. Simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from consideration.",
+    "See where AI recommendations include — or eliminate — your brand. ConsiderIQ models multi-step buyer scenarios to diagnose brand consideration in AI search.",
   keywords: [
     "AI buyer journey",
     "AI brand visibility",
@@ -23,8 +24,9 @@ export const metadata: Metadata = {
     "AI search evaluation",
     "buyer journey simulation",
     "B2B AI evaluation",
+    "brand consideration in AI search",
   ],
-  authors: [{ name: "ConsiderIQ Team" }],
+  authors: [{ name: "ConsiderIQ Research Team" }],
   creator: "ConsiderIQ",
   publisher: "ConsiderIQ",
   formatDetection: {
@@ -35,17 +37,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://consideriq.com",
+    url: getSiteUrl(),
     siteName: "ConsiderIQ",
     title: "ConsiderIQ — AI Buyer Journey Intelligence",
-    description:
-      "Simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from the consideration set.",
+    description: SITE_CONFIG.description,
   },
   twitter: {
     card: "summary_large_image",
     title: "ConsiderIQ — AI Buyer Journey Intelligence",
-    description:
-      "Simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from the consideration set.",
+    description: SITE_CONFIG.description,
   },
   robots: {
     index: true,

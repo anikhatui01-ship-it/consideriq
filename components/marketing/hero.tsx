@@ -28,67 +28,67 @@ export function Hero() {
 
       <Container size="wide">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6">
-          {/* Release / Category Badge */}
+          {/* Standardized Beta Badge */}
           <div className="inline-flex items-center gap-2">
             <Badge variant="outline" className="px-3 py-1 text-xs gap-1.5 bg-surface shadow-subtle border-border">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Public Beta v0.2</span>
+              <span>Private Research Beta</span>
               <span className="text-muted-foreground/60">·</span>
               <span className="text-muted-foreground">AI Buyer Journey Intelligence</span>
             </Badge>
           </div>
 
-          {/* Primary Headline */}
+          {/* Primary Headline per Part 4 */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.08] text-balance">
-            See how AI buyers evaluate your brand.
+            See where AI recommendations include — or eliminate — your brand.
           </h1>
 
-          {/* Supporting Copy */}
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed text-balance font-normal">
-            Simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from the consideration set.
+          {/* Supporting Copy per Part 4 */}
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed text-balance font-normal">
+            ConsiderIQ models multi-step buyer scenarios to show where a brand enters consideration, where it gets eliminated, and what information may influence the decision.
           </p>
 
-          {/* Action CTAs */}
+          {/* Action CTAs per Part 4 */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Button asChild size="lg" className="gap-2 px-6 h-12 text-base group">
               <Link href="/waitlist">
-                <span>Join the beta</span>
+                <span>Request Beta Access</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="gap-2 px-5 h-12 text-base">
-              <Link href="/how-it-works">
+              <a href="#decision-trail">
                 <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                <span>See how it works</span>
-              </Link>
+                <span>View a Sample Decision Trail</span>
+              </a>
             </Button>
           </div>
 
           {/* Trust Principles */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
               Evidence-first analysis
             </span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-accent" />
-              Raw responses inspectable
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+              Observed vs inferred separation
             </span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-accent" />
-              Observed vs inferred separation
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+              No fabricated ranking claims
             </span>
           </div>
         </div>
 
         {/* Hero Visual: Signature DecisionTrail with Interactive Inspection */}
-        <div className="mt-12 md:mt-16 max-w-5xl mx-auto">
+        <div className="mt-12 md:mt-16 max-w-5xl mx-auto" id="decision-trail">
           <div className="mb-3 flex items-center justify-between px-1">
             <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-              Interactive Architectural Concept
+              Illustrative Decision Trail
             </span>
             <span className="text-xs text-muted-foreground">
-              Select steps below to trace decision points
+              Select steps below to inspect decision points
             </span>
           </div>
 

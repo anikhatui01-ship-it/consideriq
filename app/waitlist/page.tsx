@@ -6,13 +6,14 @@ import { Container } from "@/components/shared/container";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Join Beta Waitlist",
+  title: "Request Beta Access",
   description:
-    "Join the ConsiderIQ beta cohort to simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from AI recommendations.",
+    "Request access to the ConsiderIQ Private Research Beta to model realistic buyer journeys and discover where your brand enters, survives, or disappears from AI recommendations.",
   alternates: {
-    canonical: "https://consideriq.com/waitlist",
+    canonical: getCanonicalUrl("/waitlist"),
   },
 };
 
@@ -21,16 +22,16 @@ export default function WaitlistPage() {
     <PageShell>
       <div className="py-8 md:py-12 border-b border-border bg-surface-elevated/20">
         <Container size="default">
-          <Breadcrumb items={[{ label: "Join Waitlist" }]} className="mb-4" />
+          <Breadcrumb items={[{ label: "Request Beta Access" }]} className="mb-4" />
           <div className="max-w-2xl space-y-4">
             <Badge variant="outline" className="text-xs font-mono">
-              Beta Access Registration
+              Private Research Beta
             </Badge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Join the ConsiderIQ beta cohort.
+              Request access to the ConsiderIQ research cohort.
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              We are onboarding participating software founders, growth leaders, and SEO/GEO practitioners in weekly cohorts.
+              We are onboarding participating software founders, growth leaders, and search practitioners in rolling cohorts to validate our buyer journey simulation models.
             </p>
           </div>
         </Container>
@@ -48,33 +49,33 @@ export default function WaitlistPage() {
             <div className="lg:col-span-5 space-y-6">
               <div className="rounded-xl border border-border bg-surface-elevated/40 p-6 space-y-4">
                 <h3 className="text-base font-semibold text-foreground">
-                  What happens after you join?
+                  What happens after you request access?
                 </h3>
                 <ul className="space-y-3 text-xs sm:text-sm text-muted-foreground">
                   <li className="flex items-start gap-2.5">
                     <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center font-mono text-[11px] font-semibold text-foreground shrink-0 mt-0.5">
                       1
                     </span>
-                    <span>We review your brand domain and ICP context to ensure compatibility with our simulation models.</span>
+                    <span>We review your company website and research question to confirm alignment with active test categories.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center font-mono text-[11px] font-semibold text-foreground shrink-0 mt-0.5">
                       2
                     </span>
-                    <span>You receive an invitation link to create your project and configure your buyer personas.</span>
+                    <span>When your cohort opens, you receive direct access to configure buyer personas and evaluate your brand.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center font-mono text-[11px] font-semibold text-foreground shrink-0 mt-0.5">
                       3
                     </span>
-                    <span>Run your initial 10-scenario simulation batch and inspect your Decision Trail.</span>
+                    <span>You inspect your brand&apos;s Decision Trail and provide feedback directly to our engineering team.</span>
                   </li>
                 </ul>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-6 space-y-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2 text-foreground font-semibold">
-                  <ShieldCheck className="h-4 w-4 text-accent" />
+                  <ShieldCheck className="h-4 w-4 text-primary" />
                   <span>Privacy & Confidentiality</span>
                 </div>
                 <p className="leading-relaxed">

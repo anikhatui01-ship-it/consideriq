@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getSiteUrl, SITE_CONFIG } from "@/lib/site";
 
 interface OrganizationJsonLdProps {
   name?: string;
@@ -7,16 +8,16 @@ interface OrganizationJsonLdProps {
 }
 
 export function OrganizationJsonLd({
-  name = "ConsiderIQ",
-  url = "https://consideriq.com",
+  name = SITE_CONFIG.name,
+  url,
 }: OrganizationJsonLdProps) {
+  const siteUrl = url || getSiteUrl();
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name,
-    url,
-    description:
-      "AI Buyer Journey Simulator & Brand Consideration Intelligence Platform.",
+    url: siteUrl,
+    description: SITE_CONFIG.description,
   };
 
   return (
@@ -34,10 +35,11 @@ interface SoftwareAppJsonLdProps {
 }
 
 export function SoftwareAppJsonLd({
-  name = "ConsiderIQ",
-  description = "Simulate realistic buyer journeys and discover where your brand enters, survives, or disappears from AI consideration sets.",
-  url = "https://consideriq.com",
+  name = SITE_CONFIG.name,
+  description = SITE_CONFIG.description,
+  url,
 }: SoftwareAppJsonLdProps) {
+  const siteUrl = url || getSiteUrl();
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -51,7 +53,7 @@ export function SoftwareAppJsonLd({
       availability: "https://schema.org/PreOrder",
     },
     description,
-    url,
+    url: siteUrl,
   };
 
   return (

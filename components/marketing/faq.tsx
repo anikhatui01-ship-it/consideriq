@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, ArrowRight } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface FaqItem {
@@ -13,51 +15,61 @@ interface FaqItem {
 
 const FAQ_ITEMS: FaqItem[] = [
   {
-    question: "What is ConsiderIQ and what problem does it solve?",
+    question: "What does ConsiderIQ do?",
     answer:
-      "ConsiderIQ is an AI Buyer Journey Simulator and brand-visibility intelligence tool. Rather than checking if your brand appears in a single static query, ConsiderIQ simulates multi-turn conversations where a realistic buyer specifies business requirements, eliminates unsuitable options, and asks for a final vendor recommendation.",
+      "When people use AI assistants like ChatGPT, Claude, or Gemini to find business software, they rarely stop after one question. They ask for options, introduce constraints (like budget or security), and compare recommendations. ConsiderIQ models these multi-step conversations to show where your brand is included, where it gets dropped, and which competitor is recommended instead.",
   },
   {
-    question: "How is this different from traditional mention-counting or AI SEO trackers?",
+    question: "Is ConsiderIQ live?",
     answer:
-      "Most existing tools run single isolated prompts like 'What is the best CRM?' and count brand mentions. Real B2B buyers do not buy based on one prompt; they converse across multiple turns, adding constraints around security, budget, integration, and company size. ConsiderIQ tracks the full decision path to show the exact turn where your brand disappears and which competitor replaces you.",
+      "ConsiderIQ is currently in a Private Research Beta. We are validating our buyer-journey models and decision-trail methodology with early research participants before deploying the fully automated, self-serve simulation engine.",
   },
   {
-    question: "Does ConsiderIQ guarantee AI search rankings or predict actual human purchases?",
+    question: "Are the examples real?",
     answer:
-      "No. ConsiderIQ is an analytical research instrument, not a ranking guarantee. We do not claim to predict actual human purchasing decisions, nor do we claim to see hidden internal model reasoning. We provide empirical, inspectable data on how current AI models respond to realistic buyer prompts.",
+      "No. The Decision Trail and Evidence Drawer shown on this site are illustrative examples designed to demonstrate our diagnostic methodology. They are clearly labeled as examples and do not show real customer data or live production runs.",
   },
   {
-    question: "What does 'Observed vs. Calculated vs. Inferred' mean?",
+    question: "Does ConsiderIQ guarantee AI recommendations?",
     answer:
-      "This is our core data integrity principle: OBSERVED data is the verbatim, immutable text returned by the AI provider. CALCULATED data refers to measurable programmatic checks (e.g., survival rate across 10 runs). INFERRED data represents analytical interpretations regarding why a recommendation changed. We never disguise inferences as objective provider facts.",
+      "No. ConsiderIQ is an analytical research tool, not an optimization guarantee. We do not predict human sales or promise that an AI model will rank your product first. We measure and diagnose how AI models respond to realistic, multi-step buyer scenarios.",
   },
   {
-    question: "Which AI providers and models are simulated?",
+    question: "Who is ConsiderIQ for?",
     answer:
-      "In the beta release, simulation runs target leading conversational and search-enabled AI providers including Google Gemini, OpenAI (GPT-4o), and Anthropic Claude. Raw responses from each run are stored and inspectable in full.",
+      "ConsiderIQ is designed for B2B founders, product marketers, growth teams, and search practitioners who want to understand how their brand performs when prospective buyers consult AI models for software choices.",
   },
   {
-    question: "How do you handle privacy and data security?",
+    question: "How does the research work?",
     answer:
-      "You evaluate public brand presence using public website URLs and scenario criteria. We never require access to your internal customer CRM or sensitive corporate data. Furthermore, we maintain strict multi-tenant isolation and do not train models on your scenario configurations.",
+      "We define a realistic buyer profile (such as team size, technical stack, and compliance needs), generate the sequence of questions that buyer would naturally ask, evaluate how AI models respond at each turn, and record the exact points where vendors are shortlisted or eliminated.",
+  },
+  {
+    question: "What happens in the private beta?",
+    answer:
+      "In the private beta, we work directly with selected research participants to configure custom buyer personas for their category, run scenario tests, and review their decision trails. Access is completely free during this research period.",
+  },
+  {
+    question: "Do I need technical knowledge?",
+    answer:
+      "No. You only need to know your product, your website, your typical customer profile, and the competitors you most frequently encounter in real-world buying conversations.",
   },
 ];
 
 export function FaqSection() {
-  const [openIdx, setOpenIdx] = React.useState<number | null>(0); // open first by default
+  const [openIdx, setOpenIdx] = React.useState<number | null>(0); // open first item by default
 
   const toggle = (idx: number) => {
     setOpenIdx(openIdx === idx ? null : idx);
   };
 
   return (
-    <section className="py-16 md:py-24 border-t border-border bg-surface">
+    <section className="py-16 md:py-24 border-t border-border bg-surface" id="faq">
       <Container size="default">
         <SectionHeading
           badge="FAQ"
-          title="Frequently asked questions"
-          description="Clear answers about our simulation methodology, data principles, and capabilities."
+          title="Questions? Here's the simple version."
+          description="Straightforward answers about what ConsiderIQ is, how the research works, and what to expect during our private beta."
         />
 
         <div className="max-w-3xl mx-auto divide-y divide-border border-y border-border">
@@ -74,7 +86,7 @@ export function FaqSection() {
                   aria-expanded={isOpen}
                   aria-controls={contentId}
                   onClick={() => toggle(idx)}
-                  className="flex w-full items-center justify-between text-left font-medium text-foreground hover:text-accent transition-colors gap-4 select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md p-1"
+                  className="flex w-full items-center justify-between text-left font-medium text-foreground hover:text-primary transition-colors gap-4 select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md p-1 min-h-[44px]"
                 >
                   <span className="text-base sm:text-lg font-semibold tracking-tight">
                     {item.question}
@@ -93,7 +105,7 @@ export function FaqSection() {
                     id={contentId}
                     role="region"
                     aria-labelledby={buttonId}
-                    className="pt-3 pb-1 text-sm sm:text-base text-muted-foreground leading-relaxed animate-in fade-in-0 slide-in-from-top-1 duration-150"
+                    className="pt-2 pb-1 text-sm sm:text-base text-muted-foreground leading-relaxed animate-in fade-in-0 duration-150"
                   >
                     {item.answer}
                   </div>
@@ -101,6 +113,19 @@ export function FaqSection() {
               </div>
             );
           })}
+        </div>
+
+        {/* Bottom CTA block as requested in Part 10 */}
+        <div className="mt-12 text-center max-w-md mx-auto space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Still have a question?
+          </p>
+          <Button asChild size="default" className="gap-2">
+            <Link href="/waitlist">
+              <span>Request Beta Access</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </Container>
     </section>

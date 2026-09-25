@@ -18,13 +18,14 @@ import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CtaSection } from "@/components/marketing/cta-section";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Features — AI Buyer Journey Intelligence",
   description:
     "Explore ConsiderIQ's simulation engine, persona builder, multi-turn decision trail, and evidence drawer for B2B brand consideration analysis.",
   alternates: {
-    canonical: "https://consideriq.com/features",
+    canonical: getCanonicalUrl("/features"),
   },
 };
 
@@ -57,14 +58,14 @@ const FEATURES = [
   },
   {
     icon: Cpu,
-    badge: "Multi-Model Engine",
-    title: "Multi-Provider Simulation Engine",
+    badge: "Simulation Architecture",
+    title: "Multi-Provider Simulation Design",
     description:
-      "Run your scenarios against leading AI models (Google Gemini, OpenAI GPT-4o, Anthropic Claude). Every run executes live against standard production endpoints with complete token-level transcript retention.",
+      "Designed to evaluate your scenarios against leading models (Google Gemini, OpenAI GPT-4o, Anthropic Claude). Built around strict token transcript logging and verifiable evidence rather than black-box approximations.",
     capabilities: [
-      "Immutable raw provider response logging with cryptographic hashing",
-      "Execution against leading commercial AI models and search engines",
-      "Detection of model hallucinations vs. grounded knowledge",
+      "Verbatim provider output logging without UI truncation",
+      "Multi-model testing to reveal response variations",
+      "Detection of grounded source citations vs. unsupported outputs",
       "Zero fabricated data or synthetic replacement of failed calls",
     ],
   },
@@ -184,13 +185,13 @@ export default function FeaturesPage() {
         <Container size="default">
           <div className="max-w-3xl mx-auto rounded-xl border border-border bg-surface p-6 sm:p-8 space-y-4 text-left shadow-subtle">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-accent" />
+              <ShieldCheck className="h-5 w-5 text-primary" />
               <h3 className="text-base font-semibold text-foreground">
-                Our Verification & Integrity Guarantee
+                Our Integrity Commitment
               </h3>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Every feature in ConsiderIQ is designed to uphold our core engineering constitution: we never synthesize fake AI provider calls, we never hide model variability behind arbitrary single scores, and we provide complete audit trails for every simulated conversation turn.
+              Every feature in ConsiderIQ is designed around our core engineering constitution: we never synthesize fake AI provider calls, we never hide model variability behind arbitrary single scores, and we provide complete audit trails for every simulated conversation turn.
             </p>
             <div className="pt-2">
               <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs">

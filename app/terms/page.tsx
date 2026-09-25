@@ -5,13 +5,14 @@ import { Container } from "@/components/shared/container";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "Read ConsiderIQ's Terms of Service, simulation limitations, acceptable use policies, and user responsibilities.",
   alternates: {
-    canonical: "https://consideriq.com/terms",
+    canonical: getCanonicalUrl("/terms"),
   },
 };
 
