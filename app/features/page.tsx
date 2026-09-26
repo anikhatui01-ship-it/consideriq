@@ -61,12 +61,12 @@ const FEATURES = [
     badge: "Simulation Architecture",
     title: "Multi-Provider Simulation Design",
     description:
-      "Designed to evaluate your scenarios against leading models (Google Gemini, OpenAI GPT-4o, Anthropic Claude). Built around strict token transcript logging and verifiable evidence rather than black-box approximations.",
+      "Designed around research architectures for leading models (Google Gemini, OpenAI GPT-4o, Anthropic Claude). Illustrative scenarios demonstrate structured evidence logging rather than black-box approximations.",
     capabilities: [
-      "Verbatim provider output logging without UI truncation",
-      "Multi-model testing to reveal response variations",
+      "Inspectable provider transcript formatting without UI truncation",
+      "Multi-model design to examine response variations",
       "Detection of grounded source citations vs. unsupported outputs",
-      "Zero fabricated data or synthetic replacement of failed calls",
+      "Zero fabricated data or synthetic replacement of results",
     ],
   },
   {

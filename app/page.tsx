@@ -24,7 +24,6 @@ import { Hero } from "@/components/marketing/hero";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { FeatureBlock } from "@/components/marketing/feature-block";
 import { FaqSection } from "@/components/marketing/faq";
-import { CtaSection } from "@/components/marketing/cta-section";
 import { Badge } from "@/components/ui/badge";
 import { SoftwareAppJsonLd, OrganizationJsonLd } from "@/lib/seo/jsonld";
 import { getCanonicalUrl } from "@/lib/site";
@@ -32,7 +31,7 @@ import { getCanonicalUrl } from "@/lib/site";
 export const metadata: Metadata = {
   title: "ConsiderIQ — AI Buyer Journey Intelligence",
   description:
-    "See where AI recommendations include — or eliminate — your brand. ConsiderIQ models multi-step buyer scenarios to diagnose brand consideration in AI search.",
+    "Getting mentioned isn't the decision. What happens next? ConsiderIQ is being built to understand how AI-assisted buyers narrow options, add constraints, compare alternatives, and decide which brands stay in the conversation.",
   alternates: {
     canonical: getCanonicalUrl("/"),
   },
@@ -314,7 +313,7 @@ export default function HomePage() {
               icon={Bot}
               badge="Step 3"
               title="Multi-Turn Simulation"
-              description="Simulate multi-turn conversations designed around leading models (Google Gemini, OpenAI, Claude) with full token transcript logging."
+              description="Model multi-turn dialogue trees reflecting how AI systems evaluate options. Research preview scenarios illustrate how recommendations evolve across turns."
               details={[
                 "Structured multi-turn query trees",
                 "Strict evidence classification standards",
@@ -485,9 +484,6 @@ export default function HomePage() {
 
       {/* 8: FAQ SECTION */}
       <FaqSection />
-
-      {/* 9: FINAL CTA */}
-      <CtaSection />
     </PageShell>
   );
 }

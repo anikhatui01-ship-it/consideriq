@@ -46,8 +46,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email: rawEmail, company_website: rawWebsite, role: rawRole, research_question: rawQuestion } =
-      body as Record<string, unknown>;
+    const {
+      email: rawEmail,
+      company_website: rawWebsite,
+      role: rawRole,
+      research_question: rawQuestion,
+      heard_about_us: rawHeardAboutUs,
+    } = body as Record<string, unknown>;
 
     // 1. Validate Email
     if (typeof rawEmail !== "string" || !rawEmail.trim()) {
@@ -100,7 +105,13 @@ export async function POST(request: NextRequest) {
       research_question = rawQuestion.trim().slice(0, 1000);
     }
 
-    // 5. Connect to Supabase REST endpoint
+    // 5. Validate Optional Heard About Us
+    let heard_about_us: string | null = null;
+    if (typeof rawHeardAboutUs === "string" && rawHeardAboutUs.trim()) {
+      heard_about_us = rawHeardAboutUs.trim().slice(0, 100);
+    }
+
+    // 6. Connect to Supabase REST endpoint
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const supabaseKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -130,6 +141,7 @@ export async function POST(request: NextRequest) {
         company_website,
         role,
         research_question,
+        heard_about_us,
       }),
     });
 

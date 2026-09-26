@@ -12,6 +12,7 @@ export function WaitlistForm() {
     company_website: "",
     role: "",
     research_question: "",
+    heard_about_us: "",
   });
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -79,6 +80,7 @@ export function WaitlistForm() {
           company_website: formData.company_website.trim(),
           role: formData.role.trim(),
           research_question: formData.research_question.trim() || undefined,
+          heard_about_us: formData.heard_about_us.trim() || undefined,
         }),
       });
 
@@ -222,6 +224,32 @@ export function WaitlistForm() {
             />
           </div>
 
+          {/* How did you hear about us? */}
+          <div className="space-y-1.5">
+            <label htmlFor="heard_about_us" className="text-xs font-medium text-foreground">
+              How did you hear about us?
+            </label>
+            <select
+              id="heard_about_us"
+              name="heard_about_us"
+              disabled={isSubmitting}
+              className="flex h-10 w-full rounded-md border border-input bg-surface px-3 py-2 text-sm text-foreground shadow-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:opacity-50"
+              value={formData.heard_about_us}
+              onChange={(e) =>
+                setFormData({ ...formData, heard_about_us: e.target.value })
+              }
+            >
+              <option value="">Select an option</option>
+              <option value="Reddit">Reddit</option>
+              <option value="LinkedIn">LinkedIn</option>
+              <option value="Google / Search">Google / Search</option>
+              <option value="Indie Hackers">Indie Hackers</option>
+              <option value="Product Hunt">Product Hunt</option>
+              <option value="Friend / Colleague">Friend / Colleague</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
           {/* Submit Button */}
           <div className="pt-2">
             <Button
@@ -283,6 +311,7 @@ export function WaitlistForm() {
                   company_website: "",
                   role: "",
                   research_question: "",
+                  heard_about_us: "",
                 });
                 setSubmitted(false);
               }}

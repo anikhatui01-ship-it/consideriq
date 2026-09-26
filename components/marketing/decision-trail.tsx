@@ -95,7 +95,7 @@ const DEFAULT_STEPS: DecisionStep[] = [
       '"Security audit requirement: Must support SCIM v2 user provisioning and FedRAMP or SOC 2 Type II with continuous controls."',
     brands: [
       { name: "Your Brand", isYourBrand: true, status: "eliminated", note: "SCIM documentation not explicitly cited in provider source corpus" },
-      { name: "PagerDuty", status: "active", note: "FedRAMP & mature SCIM verified" },
+      { name: "PagerDuty", status: "active", note: "FedRAMP & mature SCIM documented" },
       { name: "Rootly", status: "active", note: "SOC 2 Type II & Okta SCIM explicitly mentioned" },
     ],
     insight:
@@ -110,12 +110,12 @@ const DEFAULT_STEPS: DecisionStep[] = [
     buyerPrompt:
       '"Given our constraints, which single vendor should we schedule a pilot with this quarter?"',
     brands: [
-      { name: "Rootly", status: "recommended", note: "Top recommendation: balance of Slack workflow & verified enterprise compliance" },
+      { name: "Rootly", status: "recommended", note: "Top recommendation: balance of Slack workflow & documented enterprise compliance" },
       { name: "PagerDuty", status: "active", note: "Alternate choice if legacy enterprise integrations are mandatory" },
       { name: "Your Brand", isYourBrand: true, status: "eliminated", note: "Absent from final choice" },
     ],
     insight:
-      "Rootly secured the final single recommendation. The decision turned on compliance verification speed.",
+      "Rootly secured the final single recommendation. The decision turned on documented compliance specifications.",
     classification: "OBSERVED",
   },
 ];

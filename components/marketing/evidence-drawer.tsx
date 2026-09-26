@@ -99,19 +99,25 @@ Observed Output Text:
                 <div className="rounded-md border border-border p-3 text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-foreground">Competitor Compliance Hub</span>
-                    <Badge variant="outline" className="text-[10px]">Source Reference</Badge>
+                    <Badge variant="outline" className="text-[10px]">Source URL</Badge>
                   </div>
                   <p className="text-muted-foreground">
                     Public documentation detailing Okta SCIM 2.0 integration guides and security audit availability.
+                  </p>
+                  <p className="text-[11px] font-mono text-muted-foreground/80 pt-0.5">
+                    Source URL: https://example.com/security/compliance
                   </p>
                 </div>
                 <div className="rounded-md border border-border p-3 text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-foreground">Category Software Review Directory</span>
-                    <Badge variant="outline" className="text-[10px]">Observed Source</Badge>
+                    <Badge variant="outline" className="text-[10px]">Source URL</Badge>
                   </div>
                   <p className="text-muted-foreground">
                     Peer review summaries comparing team onboarding timelines and workflow setup speeds.
+                  </p>
+                  <p className="text-[11px] font-mono text-muted-foreground/80 pt-0.5">
+                    Source URL: https://example.com/reviews/incident-workflows
                   </p>
                 </div>
               </div>

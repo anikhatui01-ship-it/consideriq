@@ -3,10 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
 import { Container } from "@/components/shared/container";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -67,21 +66,6 @@ export function Header() {
             })}
           </nav>
 
-          {/* Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/contact"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5"
-            >
-              Contact
-            </Link>
-            <Button asChild size="sm" className="gap-1.5 group">
-              <Link href="/waitlist">
-                <span>Request Beta Access</span>
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </Button>
-          </div>
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden">
@@ -132,23 +116,10 @@ export function Header() {
                   </Link>
                 );
               })}
-              <Link
-                href="/contact"
-                onClick={closeMenu}
-                className="px-3 py-2.5 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              >
-                Contact
-              </Link>
             </nav>
           </div>
 
           <div className="pt-6 border-t border-border space-y-3">
-            <Button asChild className="w-full justify-center gap-2 h-11 text-base">
-              <Link href="/waitlist" onClick={closeMenu}>
-                <span>Request Beta Access</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
             <p className="text-center text-xs text-muted-foreground">
               Analytical simulations for modern AI brand visibility.
             </p>

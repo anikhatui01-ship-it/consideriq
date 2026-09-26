@@ -1,11 +1,9 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface FaqItem {
@@ -113,19 +111,6 @@ export function FaqSection() {
               </div>
             );
           })}
-        </div>
-
-        {/* Bottom CTA block as requested in Part 10 */}
-        <div className="mt-12 text-center max-w-md mx-auto space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Still have a question?
-          </p>
-          <Button asChild size="default" className="gap-2">
-            <Link href="/waitlist">
-              <span>Request Beta Access</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </Container>
     </section>

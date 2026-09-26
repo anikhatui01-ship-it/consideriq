@@ -38,14 +38,14 @@ export function Hero() {
             </Badge>
           </div>
 
-          {/* Primary Headline per Part 4 */}
+          {/* Primary Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.08] text-balance">
-            See where AI recommendations include — or eliminate — your brand.
+            Getting mentioned isn&apos;t the decision. What happens next?
           </h1>
 
-          {/* Supporting Copy per Part 4 */}
+          {/* Supporting Copy */}
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed text-balance font-normal">
-            ConsiderIQ models multi-step buyer scenarios to show where a brand enters consideration, where it gets eliminated, and what information may influence the decision.
+            ConsiderIQ is being built to understand how AI-assisted buyers narrow options, add constraints, compare alternatives, and decide which brands stay in the conversation.
           </p>
 
           {/* Action CTAs per Part 4 */}

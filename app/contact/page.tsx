@@ -1,17 +1,17 @@
 import * as React from "react";
 import type { Metadata } from "next";
-import { Mail, ShieldCheck } from "lucide-react";
+import { ShieldCheck, BookOpen } from "lucide-react";
 import { PageShell } from "@/components/shared/page-shell";
 import { Container } from "@/components/shared/container";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { ContactForm } from "@/components/marketing/contact-form";
-import { getCanonicalUrl, SITE_CONFIG } from "@/lib/site";
+import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact & Inquiries",
   description:
-    "Get in touch with the ConsiderIQ engineering and research team regarding beta inquiries, technical partnerships, or methodology feedback.",
+    "Information regarding research collaboration and beta access inquiries for ConsiderIQ.",
   alternates: {
     canonical: getCanonicalUrl("/contact"),
   },
@@ -28,10 +28,10 @@ export default function ContactPage() {
               Private Research Beta
             </Badge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Get in touch with the team.
+              Contact & Inquiries
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Have questions about our simulation models, research methodology, or early cohort participation? Reach out directly.
+              ConsiderIQ is currently in Private Research Beta. All research participation and brand evaluation requests are handled through our beta intake process.
             </p>
           </div>
         </Container>
@@ -40,35 +40,30 @@ export default function ContactPage() {
       <section className="py-12 md:py-20 border-b border-border bg-surface">
         <Container size="default">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-5xl mx-auto items-start">
-            {/* Contact Form / Composer */}
+            {/* Contact Intake Information */}
             <div className="lg:col-span-7">
               <ContactForm />
             </div>
 
-            {/* Direct Contact Context */}
+            {/* Program Details */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-xl border border-border bg-surface-elevated/40 p-6 space-y-4">
-                <h3 className="text-base font-semibold text-foreground">
-                  Direct Inquiries
-                </h3>
-                <div className="space-y-3 text-xs sm:text-sm text-muted-foreground">
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-4 w-4 text-primary shrink-0 mt-1" />
-                    <div>
-                      <strong className="text-foreground block">Email Address</strong>
-                      <span className="font-mono text-xs">{SITE_CONFIG.contactEmail}</span>
-                    </div>
-                  </div>
+              <div className="rounded-xl border border-border bg-surface-elevated/40 p-6 space-y-3">
+                <div className="flex items-center gap-2 text-foreground font-semibold">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  <span>Research Program Operations</span>
                 </div>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  During our Private Research Beta, we do not operate a general support inbox or unmonitored email addresses. Engineering resources are focused directly on cohort evaluations and model calibration.
+                </p>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-6 space-y-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2 text-foreground font-semibold">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
-                  <span>Research Collaboration</span>
+                  <BookOpen className="h-4 w-4 text-primary" />
+                  <span>Methodology Documentation</span>
                 </div>
                 <p className="leading-relaxed">
-                  Are you an academic researcher, AI practitioner, or agency studying generative search evaluation? We welcome methodology feedback and dataset discussions.
+                  Our simulation design, evidence classification principles, and decision trail taxonomy are documented publicly throughout our site to ensure full transparency.
                 </p>
               </div>
             </div>
