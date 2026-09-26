@@ -47,31 +47,6 @@ export default function WaitlistPage() {
 
             {/* Sidebar Context */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-xl border border-border bg-surface-elevated/40 p-6 space-y-4">
-                <h3 className="text-base font-semibold text-foreground">
-                  What happens after you request access?
-                </h3>
-                <ul className="space-y-3 text-xs sm:text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center font-mono text-[11px] font-semibold text-foreground shrink-0 mt-0.5">
-                      1
-                    </span>
-                    <span>We review your company website and research question to confirm alignment with active test categories.</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center font-mono text-[11px] font-semibold text-foreground shrink-0 mt-0.5">
-                      2
-                    </span>
-                    <span>When your cohort opens, you receive direct access to configure buyer personas and evaluate your brand.</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center font-mono text-[11px] font-semibold text-foreground shrink-0 mt-0.5">
-                      3
-                    </span>
-                    <span>You inspect your brand&apos;s Decision Trail and provide feedback directly to our engineering team.</span>
-                  </li>
-                </ul>
-              </div>
 
               <div className="rounded-xl border border-border bg-surface p-6 space-y-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2 text-foreground font-semibold">
