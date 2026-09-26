@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "test:security": "tsx scripts/verify-security.mjs",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -24,11 +25,14 @@
   },
   "homepage": "https://github.com/anikhatui01-ship-it/consideriq#readme",
   "dependencies": {
+    "@google/genai": "^2.24.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-separator": "^1.1.15",
     "@radix-ui/react-slot": "^1.3.3",
     "@radix-ui/react-tabs": "^1.1.21",
     "@radix-ui/react-tooltip": "^1.2.16",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
     "autoprefixer": "^10.6.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

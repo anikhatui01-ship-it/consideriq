@@ -1,37 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validateAndSanitizeUrl } from "@/lib/security/ssrf";
+import { rateLimiter, RATE_LIMITS, getClientIp } from "@/lib/security/rate-limit";
 
-// Standard RFC 5322 simplified email regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function normalizeUrl(rawUrl: string): string | null {
-  const trimmed = rawUrl.trim();
-  if (!trimmed) return null;
-
-  let urlWithProtocol = trimmed;
-  if (!/^https?:\/\//i.test(trimmed)) {
-    urlWithProtocol = `https://${trimmed}`;
-  }
-
-  try {
-    const parsed = new URL(urlWithProtocol);
-    if (!["http:", "https:"].includes(parsed.protocol)) {
-      return null;
-    }
-    // Must have at least a dot in hostname and reasonable length
-    if (!parsed.hostname.includes(".") || parsed.hostname.length < 3) {
-      return null;
-    }
-    return parsed.toString();
-  } catch {
-    return null;
-  }
-}
+const MAX_PAYLOAD_SIZE = 25 * 1024; // 25 KB
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Rate Limiting Check by Client IP
+    const clientIp = getClientIp(request.headers);
+    const rateLimitResult = rateLimiter.check(
+      `waitlist:${clientIp}`,
+      RATE_LIMITS.WAITLIST_SUBMISSIONS.limit,
+      RATE_LIMITS.WAITLIST_SUBMISSIONS.windowMs
+    );
+
+    if (!rateLimitResult.allowed) {
+      const minutesLeft = Math.ceil(rateLimitResult.resetMs / 60000);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many submissions. Please wait ${minutesLeft} minute(s) before submitting again.`,
+        },
+        { status: 429 }
+      );
+    }
+
+    // 2. Payload size check
     let body: unknown;
     try {
-      body = await request.json();
+      const text = await request.text();
+      if (text.length > MAX_PAYLOAD_SIZE) {
+        return NextResponse.json(
+          { success: false, error: "Payload exceeds size limit." },
+          { status: 413 }
+        );
+      }
+      body = JSON.parse(text);
     } catch {
       return NextResponse.json(
         { success: false, error: "Invalid request payload." },
@@ -54,7 +59,7 @@ export async function POST(request: NextRequest) {
       heard_about_us: rawHeardAboutUs,
     } = body as Record<string, unknown>;
 
-    // 1. Validate Email
+    // 3. Validate Email
     if (typeof rawEmail !== "string" || !rawEmail.trim()) {
       return NextResponse.json(
         { success: false, error: "Work email is required." },
@@ -69,49 +74,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Validate Company Website
+    // 4. Validate Company Website with SSRF Protection
     if (typeof rawWebsite !== "string" || !rawWebsite.trim()) {
       return NextResponse.json(
         { success: false, error: "Company website is required." },
         { status: 400 }
       );
     }
-    const company_website = normalizeUrl(rawWebsite);
-    if (!company_website || company_website.length > 500) {
+    const urlCheck = validateAndSanitizeUrl(rawWebsite);
+    if (!urlCheck.isValid || !urlCheck.normalizedUrl) {
       return NextResponse.json(
-        { success: false, error: "Please enter a valid company website URL." },
+        { success: false, error: urlCheck.error || "Please enter a valid company website URL." },
         { status: 400 }
       );
     }
+    const company_website = urlCheck.normalizedUrl;
 
-    // 3. Validate Role
+    // 5. Validate Role
     if (typeof rawRole !== "string" || !rawRole.trim()) {
       return NextResponse.json(
         { success: false, error: "Your role is required." },
         { status: 400 }
       );
     }
-    const role = rawRole.trim();
-    if (role.length > 120) {
-      return NextResponse.json(
-        { success: false, error: "Role description must be under 120 characters." },
-        { status: 400 }
-      );
-    }
+    const role = rawRole.trim().slice(0, 120);
 
-    // 4. Validate Optional Research Question
+    // 6. Validate Optional Fields
     let research_question: string | null = null;
     if (typeof rawQuestion === "string" && rawQuestion.trim()) {
       research_question = rawQuestion.trim().slice(0, 1000);
     }
 
-    // 5. Validate Optional Heard About Us
     let heard_about_us: string | null = null;
     if (typeof rawHeardAboutUs === "string" && rawHeardAboutUs.trim()) {
       heard_about_us = rawHeardAboutUs.trim().slice(0, 100);
     }
 
-    // 6. Connect to Supabase REST endpoint
+    // 7. Connect to Supabase REST endpoint safely
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const supabaseKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -119,7 +118,6 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      // Server misconfiguration - don't expose details
       return NextResponse.json(
         { success: false, error: "Waitlist submissions are temporarily unavailable. Please try again shortly." },
         { status: 503 }
@@ -165,7 +163,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse potential database error for duplicate key code
     const errorBody = await response.text();
     if (errorBody.includes("23505") || errorBody.toLowerCase().includes("unique")) {
       return NextResponse.json(

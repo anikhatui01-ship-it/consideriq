@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
 import { Container } from "@/components/shared/container";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -67,6 +69,20 @@ export function Header() {
           </nav>
 
 
+          {/* Desktop Right Actions */}
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/login"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-2 py-1.5 transition-colors"
+            >
+              Sign in
+            </Link>
+            <Button asChild size="sm" className="h-8 text-xs font-medium">
+              <Link href="/waitlist">Request Beta Access</Link>
+            </Button>
+          </div>
+
           {/* Mobile Menu Button */}
           <div className="flex md:hidden">
             <button
@@ -94,8 +110,11 @@ export function Header() {
           className="fixed inset-x-0 top-16 bottom-0 z-50 bg-background/95 backdrop-blur-md md:hidden border-t border-border flex flex-col justify-between p-6 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-150"
         >
           <div className="space-y-4">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold px-3">
-              Navigation
+            <div className="flex items-center justify-between px-3">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                Navigation
+              </span>
+              <ThemeToggle />
             </div>
             <nav className="flex flex-col space-y-1">
               {NAV_LINKS.map((link) => {
@@ -120,6 +139,18 @@ export function Header() {
           </div>
 
           <div className="pt-6 border-t border-border space-y-3">
+            <div className="flex flex-col gap-2">
+              <Button asChild variant="outline" size="sm" className="w-full justify-center">
+                <Link href="/login" onClick={closeMenu}>
+                  Sign in
+                </Link>
+              </Button>
+              <Button asChild size="sm" className="w-full justify-center">
+                <Link href="/waitlist" onClick={closeMenu}>
+                  Request Beta Access
+                </Link>
+              </Button>
+            </div>
             <p className="text-center text-xs text-muted-foreground">
               Analytical simulations for modern AI brand visibility.
             </p>

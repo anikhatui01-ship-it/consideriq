@@ -6,9 +6,10 @@ interface LogoProps {
   className?: string;
   iconOnly?: boolean;
   size?: "sm" | "default" | "lg";
+  href?: string;
 }
 
-export function Logo({ className, iconOnly = false, size = "default" }: LogoProps) {
+export function Logo({ className, iconOnly = false, size = "default", href = "/" }: LogoProps) {
   const iconSizes = {
     sm: "h-5 w-5",
     default: "h-6 w-6",
@@ -23,7 +24,7 @@ export function Logo({ className, iconOnly = false, size = "default" }: LogoProp
 
   return (
     <Link
-      href="/"
+      href={href}
       className={cn(
         "inline-flex items-center gap-2.5 font-medium tracking-tight text-foreground transition-opacity hover:opacity-90 select-none group",
         className
