@@ -128,7 +128,7 @@ export default function HowItWorksPage() {
                 <div className="rounded-lg bg-muted/60 p-4 border border-border text-xs text-muted-foreground space-y-2">
                   <span className="font-semibold text-foreground block">Planned provider execution:</span>
                   <p>
-                    The simulation engine is architected to run structured multi-turn conversation trees across leading models (Google Gemini, OpenAI, Claude). During this Private Research Beta, we test and calibrate prompt sequences with cohort participants.
+                    The simulation engine is architected to run structured multi-turn conversation trees across leading AI models, auditing how prospective buyers evaluate vendors under real-world constraints.
                   </p>
                 </div>
               </div>

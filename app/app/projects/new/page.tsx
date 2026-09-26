@@ -54,7 +54,7 @@ export default function NewProjectPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMessage(data.error || "Failed to create project.");
+        setErrorMessage(data.error || `Failed to create project (HTTP ${res.status}).`);
         setLoading(false);
         return;
       }

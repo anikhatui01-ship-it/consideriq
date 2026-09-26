@@ -14,9 +14,9 @@ interface CtaSectionProps {
 
 export function CtaSection({
   title = "Ready to inspect your brand's AI consideration set?",
-  description = "Request access to our private research beta to model realistic buyer journeys and discover where your brand enters or drops from AI recommendations.",
-  primaryActionLabel = "Request Beta Access",
-  primaryActionHref = "/waitlist",
+  description = "Start a free audit to model realistic buyer journeys and discover where your brand enters or drops from AI recommendations.",
+  primaryActionLabel = "Start Free",
+  primaryActionHref = "/signup",
 }: CtaSectionProps) {
   return (
     <section className="py-16 md:py-24 border-t border-border bg-surface-elevated/40">
@@ -30,7 +30,7 @@ export function CtaSection({
 
           <div className="max-w-2xl mx-auto space-y-6">
             <Badge variant="outline" className="px-3 py-1 text-xs font-mono bg-background">
-              Private Research Beta
+              Free Brand Audit
             </Badge>
 
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground leading-[1.15]">

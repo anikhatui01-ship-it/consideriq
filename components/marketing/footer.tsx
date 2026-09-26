@@ -20,10 +20,10 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-2 pt-1">
               <Badge variant="outline" className="text-[11px] font-mono py-0.5">
-                Private Research Beta
+                Brand Audit
               </Badge>
               <span className="text-xs text-muted-foreground">
-                Early access validation
+                AI Buyer Journey Intelligence
               </span>
             </div>
           </div>
@@ -50,8 +50,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/waitlist" className="hover:text-foreground transition-colors">
-                  Request Beta Access
+                <Link href="/signup" className="hover:text-foreground transition-colors">
+                  Start Free
                 </Link>
               </li>
             </ul>

@@ -79,7 +79,7 @@ export function Header() {
               Sign in
             </Link>
             <Button asChild size="sm" className="h-8 text-xs font-medium">
-              <Link href="/waitlist">Request Beta Access</Link>
+              <Link href="/signup">Start Free</Link>
             </Button>
           </div>
 
@@ -146,8 +146,8 @@ export function Header() {
                 </Link>
               </Button>
               <Button asChild size="sm" className="w-full justify-center">
-                <Link href="/waitlist" onClick={closeMenu}>
-                  Request Beta Access
+                <Link href="/signup" onClick={closeMenu}>
+                  Start Free
                 </Link>
               </Button>
             </div>

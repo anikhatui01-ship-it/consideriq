@@ -29,7 +29,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Effective Date: September 2026 · Version: Beta v0.2 Draft
+              Effective Date: September 2026 · Version: 1.0
             </p>
           </div>
         </Container>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             {/* Policy Content */}
             <div className="lg:col-span-8 space-y-10 text-sm leading-relaxed text-muted-foreground">
               <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs">
-                <strong>Preliminary Draft Notice:</strong> This privacy policy reflects ConsiderIQ&apos;s product data practices during our current beta release. Specific legal entity registrations, privacy contact aliases, and third-party subprocessor lists will be updated prior to commercial general availability.
+                <strong>Notice:</strong> This privacy policy reflects ConsiderIQ&apos;s product data practices across account creation, brand project audits, and AI simulation analytics.
               </div>
 
               <section id="overview" className="space-y-3">
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
                   <li><strong>Brand & Project Context:</strong> Tracked brand names, target website domains, and identified competitor profiles.</li>
                   <li><strong>Buyer Persona & Scenario Prompts:</strong> Buyer persona attributes, technical constraints, compliance criteria, and multi-turn scenario conversation trees configured by you.</li>
                   <li><strong>AI Simulation Data:</strong> Multi-turn dialogue transcripts, raw provider outputs, and source citation metadata.</li>
-                  <li><strong>Waitlist & Survey Feedback:</strong> Information voluntarily provided when requesting beta access.</li>
+                  <li><strong>Feedback & Inquiries:</strong> Information voluntarily provided when contacting support or providing feedback.</li>
                   <li><strong>Technical & Audit Logs:</strong> IP address, browser user-agent, session timestamps, and security audit logs.</li>
                 </ul>
               </section>
@@ -134,7 +134,7 @@ export default function PrivacyPage() {
                   <li><strong>Hosting & Edge Delivery:</strong> Cloudflare and Netlify for edge network routing, SSL termination, and DDoS mitigation.</li>
                   <li><strong>Database & Authentication:</strong> Supabase (PostgreSQL with Row Level Security) for data isolation and encrypted storage.</li>
                   <li><strong>AI Inference APIs:</strong> Google Cloud (Gemini) and OpenAI API for running scenario simulations.</li>
-                  <li><strong>Transactional Email:</strong> Resend for waitlist verification and invitation communications.</li>
+                  <li><strong>Transactional Email:</strong> Resend for authentication and notification communications.</li>
                 </ul>
               </section>
 

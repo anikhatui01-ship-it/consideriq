@@ -152,7 +152,7 @@ export default function AboutPage() {
 
       <CtaSection
         title="Experience evidence-first AI brand intelligence"
-        description="Join our research beta to see how realistic buyer journeys perceive and evaluate your brand."
+        description="Run a free brand audit to see how realistic buyer journeys perceive and evaluate your brand."
       />
     </PageShell>
   );

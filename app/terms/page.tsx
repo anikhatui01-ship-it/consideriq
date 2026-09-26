@@ -30,7 +30,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Effective Date: September 2026 · Version: Beta v0.2 Draft
+              Effective Date: September 2026 · Version: 1.0
             </p>
           </div>
         </Container>
@@ -76,7 +76,7 @@ export default function TermsPage() {
                   1. Agreement to Terms
                 </h2>
                 <p>
-                  These Terms of Service (&quot;Terms&quot;) govern access to and use of the ConsiderIQ software, marketing site, simulation platform, and associated services provided by ConsiderIQ (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By creating an account, requesting beta access, or using the service, you agree to be bound by these Terms.
+                  These Terms of Service (&quot;Terms&quot;) govern access to and use of the ConsiderIQ software, marketing site, simulation platform, and associated services provided by ConsiderIQ (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By creating an account, running a simulation audit, or using the service, you agree to be bound by these Terms.
                 </p>
               </section>
 
@@ -91,13 +91,13 @@ export default function TermsPage() {
 
               <section id="service-scope" className="space-y-3">
                 <h2 className="text-xl font-bold text-foreground tracking-tight">
-                  3. Scope of Service & Beta Terms
+                  3. Scope of Service
                 </h2>
                 <p>
-                  ConsiderIQ provides cloud-based software for simulating and analyzing AI-assisted purchasing journeys, including buyer persona builders, scenario generators, multi-model execution engines, Decision Trail visualizations, and citation extraction tools.
+                  ConsiderIQ provides cloud-based software for simulating and analyzing AI-assisted purchasing journeys, including buyer persona builders, scenario generators, execution engines, Decision Trail visualizations, and citation extraction tools.
                 </p>
                 <p>
-                  ConsiderIQ is currently offered in a private beta (v0.2). Beta features may undergo architectural updates, feature revisions, or temporary maintenance without prior notice.
+                  ConsiderIQ offers free brand audits as well as paid recurring subscriptions for full access. Features may undergo continuous improvements and updates.
                 </p>
               </section>
 

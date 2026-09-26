@@ -43,7 +43,7 @@ create table if not exists public.simulations (
   project_id uuid not null references public.projects(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   provider text not null default 'gemini',
-  model text not null default 'gemini-2.5-flash',
+  model text not null default 'gemini-3.8-flash',
   status text not null default 'pending' check (status in ('pending', 'running', 'completed', 'failed')),
   scenarios_count integer not null default 1,
   visibility_rate numeric check (visibility_rate >= 0 and visibility_rate <= 100),
@@ -138,4 +138,18 @@ create policy "Allow anonymous lead submission"
 
 create index if not exists idx_waitlist_email on public.waitlist_submissions(email);
 create index if not exists idx_waitlist_created_at on public.waitlist_submissions(created_at desc);
+
+-- 5. Privileges & PostgREST Schema Cache Reload
+-- Grants access to the PostgREST roles (RLS policies govern row-level access)
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all routines in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on routines to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+
+-- Reload PostgREST schema cache immediately
+notify pgrst, 'reload schema';
+
 

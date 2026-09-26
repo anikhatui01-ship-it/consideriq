@@ -28,13 +28,13 @@ export function Hero() {
 
       <Container size="wide">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6">
-          {/* Standardized Beta Badge */}
+          {/* Status Badge */}
           <div className="inline-flex items-center gap-2">
             <Badge variant="outline" className="px-3 py-1 text-xs gap-1.5 bg-surface shadow-subtle border-border">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Private Research Beta</span>
+              <span>AI Buyer Journey Intelligence</span>
               <span className="text-muted-foreground/60">·</span>
-              <span className="text-muted-foreground">AI Buyer Journey Intelligence</span>
+              <span className="text-muted-foreground">Free Brand Audit</span>
             </Badge>
           </div>
 
@@ -45,14 +45,14 @@ export function Hero() {
 
           {/* Supporting Copy */}
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed text-balance font-normal">
-            ConsiderIQ is being built to understand how AI-assisted buyers narrow options, add constraints, compare alternatives, and decide which brands stay in the conversation.
+            ConsiderIQ reveals how AI-assisted buyers narrow options, add constraints, compare alternatives, and decide which brands stay in the conversation.
           </p>
 
-          {/* Action CTAs per Part 4 */}
+          {/* Action CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Button asChild size="lg" className="gap-2 px-6 h-12 text-base group">
-              <Link href="/waitlist">
-                <span>Request Beta Access</span>
+              <Link href="/signup">
+                <span>Start Free</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>

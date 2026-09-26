@@ -163,7 +163,16 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertError) {
-    return NextResponse.json({ error: "Database error occurred while saving brand project." }, { status: 500 });
+    console.error("[Project Creation] insert failed", {
+      code: insertError.code,
+      message: insertError.message,
+      details: insertError.details,
+      hint: insertError.hint,
+    });
+    return NextResponse.json(
+      { error: "Unable to save this brand project. Please try again." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ project }, { status: 201 });

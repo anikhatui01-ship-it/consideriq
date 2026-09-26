@@ -9,7 +9,7 @@ import {
 export class GeminiProvider implements AIProvider {
   readonly id = "gemini";
   readonly name = "Google Gemini";
-  readonly defaultModel = "gemini-2.5-flash";
+  readonly defaultModel = "gemini-3.8-flash";
 
   private getClient(): GoogleGenAI {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -30,9 +30,12 @@ export class GeminiProvider implements AIProvider {
     options?: ProviderGenerateOptions
   ): Promise<ProviderGenerateResult> {
     const client = this.getClient();
-    const model = options?.model || this.defaultModel;
+    const candidateModels = [
+      options?.model || this.defaultModel,
+      "gemini-3.7-flash",
+      "gemini-flash-latest",
+    ];
 
-    // Build configuration
     const config: Record<string, unknown> = {};
     if (typeof options?.temperature === "number") {
       config.temperature = options.temperature;
@@ -48,39 +51,48 @@ export class GeminiProvider implements AIProvider {
       config.responseJsonSchema = options.responseJsonSchema;
     }
 
-    try {
-      const response = await client.models.generateContent({
-        model,
-        contents: prompt,
-        config: Object.keys(config).length > 0 ? config : undefined,
-      });
+    let lastError: Error | null = null;
+    for (const model of candidateModels) {
+      try {
+        const response = await client.models.generateContent({
+          model,
+          contents: prompt,
+          config: Object.keys(config).length > 0 ? config : undefined,
+        });
 
-      const rawText = response.text || "";
-      let parsedJson: unknown = undefined;
+        const rawText = response.text || "";
+        let parsedJson: unknown = undefined;
 
-      if (options?.responseJsonSchema && rawText) {
-        try {
-          parsedJson = JSON.parse(rawText);
-        } catch {
-          // If JSON parse fails, rawText remains intact
+        if (options?.responseJsonSchema && rawText) {
+          try {
+            parsedJson = JSON.parse(rawText);
+          } catch {
+            // If JSON parse fails, rawText remains intact
+          }
         }
-      }
 
-      return {
-        rawText,
-        parsedJson,
-        usage: {
-          promptTokens: response.usageMetadata?.promptTokenCount,
-          candidatesTokens: response.usageMetadata?.candidatesTokenCount,
-          totalTokens: response.usageMetadata?.totalTokenCount,
-        },
-      };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown Gemini API error";
-      // Sanitize: ensure no API keys or raw credentials in the error message
-      const sanitized = message.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]");
-      throw new Error(`Gemini simulation failed: ${sanitized}`);
+        return {
+          rawText,
+          parsedJson,
+          usage: {
+            promptTokens: response.usageMetadata?.promptTokenCount,
+            candidatesTokens: response.usageMetadata?.candidatesTokenCount,
+            totalTokens: response.usageMetadata?.totalTokenCount,
+          },
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Unknown Gemini API error";
+        const sanitized = message.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]");
+        lastError = new Error(`Gemini simulation failed: ${sanitized}`);
+        // If 404 or 503, try next candidate model
+        if (message.includes("404") || message.includes("503") || message.includes("UNAVAILABLE")) {
+          continue;
+        }
+        throw lastError;
+      }
     }
+
+    throw lastError || new Error("Gemini simulation failed across available models.");
   }
 
   async generateConversationTurn(
@@ -89,7 +101,11 @@ export class GeminiProvider implements AIProvider {
     options?: ProviderGenerateOptions
   ): Promise<ProviderGenerateResult> {
     const client = this.getClient();
-    const model = options?.model || this.defaultModel;
+    const candidateModels = [
+      options?.model || this.defaultModel,
+      "gemini-3.7-flash",
+      "gemini-flash-latest",
+    ];
 
     // Convert history to Gemini format
     const contents = history
@@ -119,37 +135,46 @@ export class GeminiProvider implements AIProvider {
       config.responseJsonSchema = options.responseJsonSchema;
     }
 
-    try {
-      const response = await client.models.generateContent({
-        model,
-        contents,
-        config: Object.keys(config).length > 0 ? config : undefined,
-      });
+    let lastError: Error | null = null;
+    for (const model of candidateModels) {
+      try {
+        const response = await client.models.generateContent({
+          model,
+          contents,
+          config: Object.keys(config).length > 0 ? config : undefined,
+        });
 
-      const rawText = response.text || "";
-      let parsedJson: unknown = undefined;
+        const rawText = response.text || "";
+        let parsedJson: unknown = undefined;
 
-      if (options?.responseJsonSchema && rawText) {
-        try {
-          parsedJson = JSON.parse(rawText);
-        } catch {
-          // Keep rawText
+        if (options?.responseJsonSchema && rawText) {
+          try {
+            parsedJson = JSON.parse(rawText);
+          } catch {
+            // Keep rawText
+          }
         }
-      }
 
-      return {
-        rawText,
-        parsedJson,
-        usage: {
-          promptTokens: response.usageMetadata?.promptTokenCount,
-          candidatesTokens: response.usageMetadata?.candidatesTokenCount,
-          totalTokens: response.usageMetadata?.totalTokenCount,
-        },
-      };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown Gemini API error";
-      const sanitized = message.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]");
-      throw new Error(`Gemini simulation failed: ${sanitized}`);
+        return {
+          rawText,
+          parsedJson,
+          usage: {
+            promptTokens: response.usageMetadata?.promptTokenCount,
+            candidatesTokens: response.usageMetadata?.candidatesTokenCount,
+            totalTokens: response.usageMetadata?.totalTokenCount,
+          },
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Unknown Gemini API error";
+        const sanitized = message.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]");
+        lastError = new Error(`Gemini simulation failed: ${sanitized}`);
+        if (message.includes("404") || message.includes("503") || message.includes("UNAVAILABLE")) {
+          continue;
+        }
+        throw lastError;
+      }
     }
+
+    throw lastError || new Error("Gemini simulation failed across available models.");
   }
 }

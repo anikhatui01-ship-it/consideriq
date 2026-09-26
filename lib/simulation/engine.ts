@@ -1,7 +1,7 @@
 import { Project, BrandTurnStatus, TurnCitation, DecisionStage, EvidenceClassification } from "@/lib/types/database";
 import { AIProvider, AIProviderMessage } from "@/lib/providers/types";
 import { getProvider } from "@/lib/providers";
-import { buildBuyerJourneyPlan } from "./prompts";
+import { buildBuyerJourneyPlan, BuyerJourneyTurnPlan } from "./prompts";
 
 export interface SimulationTurnResult {
   turnIndex: number;
@@ -16,6 +16,12 @@ export interface SimulationTurnResult {
   classification: EvidenceClassification;
 }
 
+export interface SimulationTiming {
+  turnIndex: number;
+  stage: DecisionStage;
+  durationMs: number;
+}
+
 export interface SimulationExecutionResult {
   visibilityRate: number;
   shortlistRate: number;
@@ -23,6 +29,10 @@ export interface SimulationExecutionResult {
   eliminationRate: number;
   eliminatedAtTurn: number | null;
   turns: SimulationTurnResult[];
+  timings?: {
+    totalDurationMs: number;
+    turnDurations: SimulationTiming[];
+  };
 }
 
 export class SimulationEngine {
@@ -42,8 +52,10 @@ export class SimulationEngine {
     const turnsPlan = buildBuyerJourneyPlan(project);
     const conversationHistory: AIProviderMessage[] = [];
     const turnsResults: SimulationTurnResult[] = [];
+    const turnDurations: SimulationTiming[] = [];
+    const totalStart = Date.now();
 
-    // System instruction defining the AI buyer simulation environment
+    // System instruction defining the AI buyer simulation environment and structured JSON contract
     const systemInstruction = `You are an expert enterprise software evaluation assistant and consultative procurement advisor.
 A prospective B2B software buyer is evaluating vendor options for their company in the category: "${project.category}".
 Buyer Profile: "${project.target_persona}".
@@ -52,38 +64,105 @@ Known competitors in this space: ${project.competitors.join(", ")}.
 
 Provide objective, technically accurate, rigorous evaluation responses.
 Clearly evaluate software options by name based on publicly known architectural, security, pricing, and integration capabilities.
-Do not invent fake tools or fabricated features. Ground every assessment in realistic software capabilities.`;
+Do not invent fake tools or fabricated features. Ground every assessment in realistic software capabilities.
+Keep your conversational response concise, analytical, and under 250 words.
+You MUST output your response as a valid JSON object matching the provided schema.`;
 
-    // Execute turns sequentially
+    // JSON Schema for structured turn generation in a single call
+    const structuredTurnSchema = {
+      type: "object",
+      properties: {
+        observedResponse: {
+          type: "string",
+          description: "Concise (under 250 words) consultative advice and evaluation response answering the buyer's query directly.",
+        },
+        brands: {
+          type: "array",
+          description: "List of vendors evaluated or mentioned in this turn.",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string", description: "Brand / vendor name" },
+              isYourBrand: { type: "boolean", description: "True if this matches the tracked brand under evaluation" },
+              status: {
+                type: "string",
+                enum: ["candidate", "active", "eliminated", "recommended"],
+                description: "Vendor status: candidate (initial mention), active (shortlisted), eliminated (dropped/failed constraints), recommended (winning recommendation)",
+              },
+              note: { type: "string", description: "Brief evaluation note or reason observed in text" },
+            },
+            required: ["name", "isYourBrand", "status"],
+          },
+        },
+        citations: {
+          type: "array",
+          description: "Public documentation, URL, or domain references grounding the assessment. Do NOT invent fake URLs.",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              url: { type: "string" },
+              snippet: { type: "string" },
+            },
+            required: ["title", "url"],
+          },
+        },
+        insight: {
+          type: "string",
+          description: "Concise analytical summary of vendor consideration, survival, or elimination at this stage.",
+        },
+      },
+      required: ["observedResponse", "brands", "citations", "insight"],
+    };
+
+    // Execute exactly 5 turns: ONE Gemini call per turn (TOTAL = 5 calls)
     for (const plan of turnsPlan) {
-      // 1. Generate the conversational turn with Gemini
-      const turnResponse = await this.provider.generateConversationTurn(
-        conversationHistory,
-        plan.buyerPrompt,
-        {
-          systemInstruction,
-          temperature: 0.3, // Low temperature for high reproducibility and factuality
-          maxOutputTokens: 1500,
-        }
-      );
+      const turnStart = Date.now();
 
-      const observedText = turnResponse.rawText;
+      let turnResponse;
+      try {
+        turnResponse = await this.provider.generateConversationTurn(
+          conversationHistory,
+          plan.buyerPrompt,
+          {
+            systemInstruction,
+            temperature: 0.2, // Low temperature for high reproducibility and factuality
+            maxOutputTokens: 1000, // Token cap around 900-1000 tokens
+            responseJsonSchema: structuredTurnSchema,
+          }
+        );
+      } catch (providerErr: unknown) {
+        const turnDurationMs = Date.now() - turnStart;
+        const rawMsg = providerErr instanceof Error ? providerErr.message : "Provider call failed";
+        console.error(`[Simulation] Turn ${plan.turnIndex} (${plan.stage}) failed after ${turnDurationMs}ms:`, rawMsg);
+        
+        const enhancedError = new Error(`Turn ${plan.turnIndex} (${plan.stage}) provider error: ${rawMsg}`);
+        (enhancedError as { turnIndex?: number }).turnIndex = plan.turnIndex;
+        (enhancedError as { stage?: string }).stage = plan.stage;
+        throw enhancedError;
+      }
 
-      // Update conversation history for multi-turn coherence
+      const turnDurationMs = Date.now() - turnStart;
+      turnDurations.push({
+        turnIndex: plan.turnIndex,
+        stage: plan.stage,
+        durationMs: turnDurationMs,
+      });
+      console.log(`[Simulation] Turn ${plan.turnIndex} (${plan.stage}) completed in ${turnDurationMs}ms`);
+
+      // Parse structured JSON with deterministic fallback
+      const parsedData = this.resolveTurnData(turnResponse.parsedJson, turnResponse.rawText, project, plan);
+
+      // Append only the conversational observedResponse to history for turn-to-turn coherence
       conversationHistory.push({ role: "user", content: plan.buyerPrompt });
-      conversationHistory.push({ role: "model", content: observedText });
+      conversationHistory.push({ role: "model", content: parsedData.observedResponse });
 
-      // 2. Extract structured consideration set & citations from this turn
-      const { brands, citations, insight } = await this.extractTurnAnalysis(
-        project,
-        plan,
-        observedText
-      );
-
-      // 3. Determine evidence classification for this turn
-      // Turn 1, 2, 5 are primarily OBSERVED (direct text statements)
-      // Turn 3 is CALCULATED (ranking/shortlist synthesis)
-      // Turn 4 is INFERRED (reasoning behind elimination criteria)
+      // Preserve evidence classification standards:
+      // QUESTION = OBSERVED
+      // CONSTRAINT = OBSERVED
+      // SHORTLIST = CALCULATED
+      // ELIMINATION = INFERRED
+      // RECOMMENDATION = OBSERVED
       let classification: EvidenceClassification = "OBSERVED";
       if (plan.stage === "SHORTLIST") {
         classification = "CALCULATED";
@@ -97,155 +176,150 @@ Do not invent fake tools or fabricated features. Ground every assessment in real
         title: plan.title,
         subtitle: plan.subtitle,
         buyerPrompt: plan.buyerPrompt,
-        observedResponse: observedText,
-        brands,
-        citations,
-        insight,
+        observedResponse: parsedData.observedResponse,
+        brands: parsedData.brands,
+        citations: parsedData.citations,
+        insight: parsedData.insight,
         classification,
       });
     }
 
-    // 4. Calculate empirical metrics directly from the simulation turns
-    return this.calculateMetrics(project, turnsResults);
-  }
+    const totalDurationMs = Date.now() - totalStart;
+    console.log(`[Simulation] Total simulation completed in ${totalDurationMs}ms across 5 turns.`);
 
-  private async extractTurnAnalysis(
-    project: Project,
-    plan: { stage: DecisionStage; buyerPrompt: string; turnIndex: number },
-    observedText: string
-  ): Promise<{ brands: BrandTurnStatus[]; citations: TurnCitation[]; insight: string }> {
-    const analysisPrompt = `Analyze this procurement conversation turn and extract the vendor consideration status.
-Tracked Brand Name: "${project.name}"
-Competitors to identify: ${project.competitors.join(", ")}
-
-Buyer Prompt:
-"${plan.buyerPrompt}"
-
-Observed AI Response:
-"""
-${observedText}
-"""
-
-Return a JSON object conforming exactly to this structure:
-{
-  "brands": [
-    {
-      "name": "Brand Name",
-      "isYourBrand": boolean,
-      "status": "candidate" | "active" | "eliminated" | "recommended",
-      "note": "Brief justification observed in text"
-    }
-  ],
-  "citations": [
-    {
-      "title": "Title of public documentation or review source",
-      "url": "URL if explicitly mentioned in text (do NOT fabricate URLs)",
-      "snippet": "Quoted excerpt from text"
-    }
-  ],
-  "insight": "1-2 concise sentences explaining what happened to ${project.name} and competitors at this stage."
-}
-
-Rules:
-1. Always include "${project.name}" in the brands list if mentioned in the response or prompt.
-2. Mark status as:
-   - "candidate": initial mention in early discovery
-   - "active": survived constraints and actively shortlisted
-   - "eliminated": ruled out, dropped, or failed constraints
-   - "recommended": chosen as the final recommended option
-3. Never invent fake URLs. If no URLs are mentioned in the response, return an empty array for citations: []
-4. Maintain factual adherence to the observed text.`;
-
-    const schema = {
-      type: "OBJECT",
-      properties: {
-        brands: {
-          type: "ARRAY",
-          items: {
-            type: "OBJECT",
-            properties: {
-              name: { type: "STRING" },
-              isYourBrand: { type: "BOOLEAN" },
-              status: {
-                type: "STRING",
-                enum: ["candidate", "active", "eliminated", "recommended"],
-              },
-              note: { type: "STRING" },
-            },
-            required: ["name", "isYourBrand", "status"],
-          },
-        },
-        citations: {
-          type: "ARRAY",
-          items: {
-            type: "OBJECT",
-            properties: {
-              title: { type: "STRING" },
-              url: { type: "STRING" },
-              snippet: { type: "STRING" },
-            },
-            required: ["title", "url"],
-          },
-        },
-        insight: { type: "STRING" },
+    // Calculate empirical metrics directly from the simulation turns
+    const metrics = this.calculateMetrics(project, turnsResults);
+    return {
+      ...metrics,
+      timings: {
+        totalDurationMs,
+        turnDurations,
       },
-      required: ["brands", "insight"],
     };
-
-    try {
-      const result = await this.provider.generateResponse(analysisPrompt, {
-        temperature: 0.1,
-        responseJsonSchema: schema,
-      });
-
-      if (result.parsedJson && typeof result.parsedJson === "object") {
-        const parsed = result.parsedJson as {
-          brands?: BrandTurnStatus[];
-          citations?: TurnCitation[];
-          insight?: string;
-        };
-
-        const brands = Array.isArray(parsed.brands) ? parsed.brands : [];
-        const citations = Array.isArray(parsed.citations)
-          ? parsed.citations.filter((c) => Boolean(c.url && !c.url.includes("example.com")))
-          : [];
-        const insight = parsed.insight || `Turn ${plan.turnIndex} evaluation completed.`;
-
-        // Ensure tracked brand is explicitly tagged
-        const normalizedYourBrand = project.name.toLowerCase();
-        brands.forEach((b) => {
-          if (b.name.toLowerCase() === normalizedYourBrand) {
-            b.isYourBrand = true;
-          }
-        });
-
-        // If tracked brand wasn't included by model, check if it was in the text
-        const hasTrackedBrand = brands.some((b) => b.isYourBrand);
-        if (!hasTrackedBrand) {
-          const wasMentioned = observedText.toLowerCase().includes(normalizedYourBrand);
-          brands.push({
-            name: project.name,
-            isYourBrand: true,
-            status: wasMentioned ? (plan.stage === "ELIMINATION" ? "eliminated" : "active") : "eliminated",
-            note: wasMentioned ? "Mentioned in model response" : "Not included in candidate consideration set",
-          });
-        }
-
-        return { brands, citations, insight };
-      }
-    } catch {
-      // Fallback: graceful parsing if JSON schema generation encounters an issue
-    }
-
-    // Deterministic fallback based on text substring matching
-    return this.fallbackTextAnalysis(project, plan, observedText);
   }
 
-  private fallbackTextAnalysis(
+  private resolveTurnData(
+    parsedJson: unknown,
+    rawText: string,
     project: Project,
-    plan: { stage: DecisionStage; turnIndex: number },
+    plan: BuyerJourneyTurnPlan
+  ): {
+    observedResponse: string;
+    brands: BrandTurnStatus[];
+    citations: TurnCitation[];
+    insight: string;
+  } {
+    // 1. Direct structured JSON from Gemini provider
+    if (parsedJson && typeof parsedJson === "object") {
+      const data = parsedJson as {
+        observedResponse?: string;
+        brands?: BrandTurnStatus[];
+        citations?: TurnCitation[];
+        insight?: string;
+      };
+
+      if (typeof data.observedResponse === "string" && data.observedResponse.trim().length > 0) {
+        return this.normalizeStructuredData(data, rawText, project, plan);
+      }
+    }
+
+    // 2. Fallback: attempt regex extraction of JSON block from rawText
+    if (rawText && rawText.includes("{")) {
+      try {
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed && typeof parsed === "object") {
+            return this.normalizeStructuredData(parsed, rawText, project, plan);
+          }
+        }
+      } catch {
+        // Fall through to deterministic fallback
+      }
+    }
+
+    // 3. Deterministic fallback parsing (preserves rawText without crashing simulation)
+    return this.fallbackDeterministicParsing(project, plan, rawText);
+  }
+
+  private normalizeStructuredData(
+    data: {
+      observedResponse?: string;
+      brands?: BrandTurnStatus[];
+      citations?: TurnCitation[];
+      insight?: string;
+    },
+    rawText: string,
+    project: Project,
+    plan: BuyerJourneyTurnPlan
+  ): {
+    observedResponse: string;
+    brands: BrandTurnStatus[];
+    citations: TurnCitation[];
+    insight: string;
+  } {
+    const observedResponse =
+      typeof data.observedResponse === "string" && data.observedResponse.trim().length > 0
+        ? data.observedResponse.trim()
+        : rawText.trim();
+
+    const rawBrands = Array.isArray(data.brands) ? data.brands : [];
+    const brands: BrandTurnStatus[] = rawBrands.map((b) => ({
+      name: String(b.name || "Unknown Vendor").trim(),
+      isYourBrand: Boolean(b.isYourBrand),
+      status: ["candidate", "active", "eliminated", "recommended"].includes(b.status)
+        ? b.status
+        : "active",
+      note: b.note ? String(b.note).trim() : undefined,
+    }));
+
+    // Ensure tracked brand is explicitly identified
+    const normalizedYourBrand = project.name.toLowerCase();
+    brands.forEach((b) => {
+      if (b.name.toLowerCase() === normalizedYourBrand) {
+        b.isYourBrand = true;
+      }
+    });
+
+    // If tracked brand wasn't included by model in brands array, check if mentioned in response
+    const hasTrackedBrand = brands.some((b) => b.isYourBrand);
+    if (!hasTrackedBrand) {
+      const wasMentioned = observedResponse.toLowerCase().includes(normalizedYourBrand);
+      brands.push({
+        name: project.name,
+        isYourBrand: true,
+        status: wasMentioned ? (plan.stage === "ELIMINATION" ? "eliminated" : "active") : "eliminated",
+        note: wasMentioned ? "Identified in model response text" : "Omitted from candidate consideration set",
+      });
+    }
+
+    const rawCitations = Array.isArray(data.citations) ? data.citations : [];
+    const citations: TurnCitation[] = rawCitations
+      .filter((c) => Boolean(c.url && !c.url.includes("example.com")))
+      .map((c) => ({
+        title: String(c.title || "Reference Document").trim(),
+        url: String(c.url).trim(),
+        snippet: c.snippet ? String(c.snippet).trim() : undefined,
+      }));
+
+    const insight =
+      typeof data.insight === "string" && data.insight.trim().length > 0
+        ? data.insight.trim()
+        : `Turn ${plan.turnIndex} (${plan.stage}) evaluation completed.`;
+
+    return {
+      observedResponse,
+      brands,
+      citations,
+      insight,
+    };
+  }
+
+  private fallbackDeterministicParsing(
+    project: Project,
+    plan: BuyerJourneyTurnPlan,
     text: string
-  ): { brands: BrandTurnStatus[]; citations: TurnCitation[]; insight: string } {
+  ): { brands: BrandTurnStatus[]; citations: TurnCitation[]; insight: string; observedResponse: string } {
     const brands: BrandTurnStatus[] = [];
     const lowerText = text.toLowerCase();
 
@@ -267,7 +341,7 @@ Rules:
       name: project.name,
       isYourBrand: true,
       status: yourStatus,
-      note: yourBrandMentioned ? "Identified in model response" : "Absent from model consideration set",
+      note: yourBrandMentioned ? "Identified in model response" : "Absent from candidate consideration set",
     });
 
     // Check known competitors
@@ -282,6 +356,7 @@ Rules:
     }
 
     return {
+      observedResponse: text.trim() || `Turn ${plan.turnIndex} evaluation response.`,
       brands,
       citations: [],
       insight: `Empirical evaluation for Turn ${plan.turnIndex}: ${
@@ -293,7 +368,14 @@ Rules:
   private calculateMetrics(
     project: Project,
     turns: SimulationTurnResult[]
-  ): SimulationExecutionResult {
+  ): {
+    visibilityRate: number;
+    shortlistRate: number;
+    recommendationRate: number;
+    eliminationRate: number;
+    eliminatedAtTurn: number | null;
+    turns: SimulationTurnResult[];
+  } {
     let turnsWithBrand = 0;
     let shortlisted = false;
     let recommended = false;
@@ -320,7 +402,6 @@ Rules:
       }
     });
 
-    // Calculations
     const visibilityRate = Math.round((turnsWithBrand / turns.length) * 100);
     const shortlistRate = shortlisted ? 100 : 0;
     const recommendationRate = recommended ? 100 : 0;

@@ -5,6 +5,8 @@ import { getProvider } from "@/lib/providers";
 import { Project } from "@/lib/types/database";
 import { rateLimiter, RATE_LIMITS } from "@/lib/security/rate-limit";
 
+export const maxDuration = 60;
+
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function POST(request: NextRequest) {
@@ -15,7 +17,13 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      {
+        error: "Authentication required to run a simulation.",
+        errorType: "auth",
+      },
+      { status: 401 }
+    );
   }
 
   // 1. Rate limiting check
@@ -30,6 +38,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: `Simulation rate limit reached. Please wait ${minutesLeft} minute(s) before launching another simulation.`,
+        errorType: "rate_limit",
       },
       { status: 429 }
     );
@@ -68,6 +77,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "A simulation is currently in progress. Please wait for it to finish before starting a new run.",
+        errorType: "concurrency",
       },
       { status: 409 }
     );
@@ -82,7 +92,13 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (projectError || !projectData) {
-    return NextResponse.json({ error: "Brand project not found or access denied." }, { status: 404 });
+    return NextResponse.json(
+      {
+        error: "Brand project not found or access denied.",
+        errorType: "project_not_found",
+      },
+      { status: 404 }
+    );
   }
 
   const project: Project = projectData;
@@ -94,6 +110,7 @@ export async function POST(request: NextRequest) {
       {
         error:
           "Google Gemini API key is not configured in the server environment. Please configure GEMINI_API_KEY to run live simulations.",
+        errorType: "gemini_configuration",
       },
       { status: 400 }
     );
@@ -114,8 +131,15 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertSimError || !simulation) {
+    console.error("[Simulation Initialization] insert failed", {
+      code: insertSimError?.code,
+      message: insertSimError?.message,
+    });
     return NextResponse.json(
-      { error: "Unable to initialize simulation record. Please try again." },
+      {
+        error: "Database error occurred while initializing simulation record.",
+        errorType: "database",
+      },
       { status: 500 }
     );
   }
@@ -145,7 +169,11 @@ export async function POST(request: NextRequest) {
       .insert(turnsToInsert);
 
     if (turnsError) {
-      throw new Error("Failed to persist simulation turns.");
+      console.error("[Simulation Persistence] turns insert failed", {
+        code: turnsError.code,
+        message: turnsError.message,
+      });
+      throw new Error("DATABASE_PERSISTENCE_ERROR: Failed to persist simulation turns.");
     }
 
     // 9. Update simulation status and calculated metrics
@@ -163,7 +191,11 @@ export async function POST(request: NextRequest) {
       .eq("user_id", user.id);
 
     if (updateError) {
-      throw new Error("Failed to finalize simulation status.");
+      console.error("[Simulation Persistence] final status update failed", {
+        code: updateError.code,
+        message: updateError.message,
+      });
+      throw new Error("DATABASE_PERSISTENCE_ERROR: Failed to finalize simulation status.");
     }
 
     return NextResponse.json({
@@ -172,13 +204,41 @@ export async function POST(request: NextRequest) {
       result,
     });
   } catch (err: unknown) {
-    // Sanitize any potential provider or credential leaks
     let safeMessage = "Simulation execution encountered an error.";
+    let errorType: "gemini_provider" | "database" | "timeout" | "unknown" = "unknown";
+    let turnIndex: number | undefined;
+    let stage: string | undefined;
+
     if (err instanceof Error) {
-      safeMessage = err.message
-        .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
-        .slice(0, 300);
+      const errMsg = err.message;
+      if (errMsg.includes("DATABASE_PERSISTENCE_ERROR")) {
+        safeMessage = "Unable to save simulation results to the database. Please try again.";
+        errorType = "database";
+      } else if (errMsg.includes("provider error") || errMsg.includes("Gemini simulation failed")) {
+        errorType = "gemini_provider";
+        safeMessage = errMsg
+          .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
+          .slice(0, 300);
+      } else if (errMsg.includes("timeout") || errMsg.includes("aborted")) {
+        errorType = "timeout";
+        safeMessage = "Simulation timed out while awaiting AI provider response.";
+      } else {
+        safeMessage = errMsg
+          .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
+          .slice(0, 300);
+      }
+
+      turnIndex = (err as { turnIndex?: number }).turnIndex;
+      stage = (err as { stage?: string }).stage;
     }
+
+    console.error("[Simulation Run Failed]", {
+      simulationId: simulation.id,
+      errorType,
+      turnIndex,
+      stage,
+      message: safeMessage,
+    });
 
     // Update simulation status to failed
     await supabase
@@ -190,6 +250,14 @@ export async function POST(request: NextRequest) {
       .eq("id", simulation.id)
       .eq("user_id", user.id);
 
-    return NextResponse.json({ error: safeMessage }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: safeMessage,
+        errorType,
+        turnIndex,
+        stage,
+      },
+      { status: 500 }
+    );
   }
 }

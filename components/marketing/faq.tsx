@@ -20,7 +20,7 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Is ConsiderIQ live?",
     answer:
-      "ConsiderIQ is currently in a Private Research Beta. We are validating our buyer-journey models and decision-trail methodology with early research participants before deploying the fully automated, self-serve simulation engine.",
+      "Yes. ConsiderIQ allows you to create a free account, set up your brand project, and run an initial AI buyer journey audit immediately to see real-time consideration and elimination analysis.",
   },
   {
     question: "Are the examples real?",
@@ -43,9 +43,9 @@ const FAQ_ITEMS: FaqItem[] = [
       "We define a realistic buyer profile (such as team size, technical stack, and compliance needs), generate the sequence of questions that buyer would naturally ask, evaluate how AI models respond at each turn, and record the exact points where vendors are shortlisted or eliminated.",
   },
   {
-    question: "What happens in the private beta?",
+    question: "How does the free audit work?",
     answer:
-      "In the private beta, we work directly with selected research participants to configure custom buyer personas for their category, run scenario tests, and review their decision trails. Access is completely free during this research period.",
+      "You can create an account and run a free brand audit. You'll see how your brand performs across multi-turn buyer scenarios, which competitors are shortlisted, and where drop-offs happen.",
   },
   {
     question: "Do I need technical knowledge?",
@@ -67,7 +67,7 @@ export function FaqSection() {
         <SectionHeading
           badge="FAQ"
           title="Questions? Here's the simple version."
-          description="Straightforward answers about what ConsiderIQ is, how the research works, and what to expect during our private beta."
+          description="Straightforward answers about what ConsiderIQ is, how buyer journey simulations work, and how to get started."
         />
 
         <div className="max-w-3xl mx-auto divide-y divide-border border-y border-border">

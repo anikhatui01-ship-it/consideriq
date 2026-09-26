@@ -9,9 +9,9 @@ import { ContactForm } from "@/components/marketing/contact-form";
 import { getCanonicalUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Contact & Inquiries",
+  title: "Contact & Support",
   description:
-    "Information regarding research collaboration and beta access inquiries for ConsiderIQ.",
+    "Get in touch with the ConsiderIQ team for support, enterprise questions, or general inquiries.",
   alternates: {
     canonical: getCanonicalUrl("/contact"),
   },
@@ -25,13 +25,13 @@ export default function ContactPage() {
           <Breadcrumb items={[{ label: "Contact" }]} className="mb-4" />
           <div className="max-w-2xl space-y-4">
             <Badge variant="outline" className="text-xs font-mono">
-              Private Research Beta
+              Get in Touch
             </Badge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Contact & Inquiries
+              Contact & Support
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              ConsiderIQ is currently in Private Research Beta. All research participation and brand evaluation requests are handled through our beta intake process.
+              Have questions about your brand&apos;s AI buyer journey simulations or need custom enterprise analysis? We&apos;re here to help.
             </p>
           </div>
         </Container>
@@ -50,10 +50,10 @@ export default function ContactPage() {
               <div className="rounded-xl border border-border bg-surface-elevated/40 p-6 space-y-3">
                 <div className="flex items-center gap-2 text-foreground font-semibold">
                   <ShieldCheck className="h-4 w-4 text-primary" />
-                  <span>Research Program Operations</span>
+                  <span>Platform Operations</span>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  During our Private Research Beta, we do not operate a general support inbox or unmonitored email addresses. Engineering resources are focused directly on cohort evaluations and model calibration.
+                  ConsiderIQ simulations execute automated multi-turn AI buyer queries against real LLM providers. Account holders receive dedicated support directly through the platform dashboard.
                 </p>
               </div>
 

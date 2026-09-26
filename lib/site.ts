@@ -27,7 +27,7 @@ export const SITE_CONFIG = {
   legalName: "ConsiderIQ",
   tagline: "AI Buyer Journey Intelligence",
   description:
-    "ConsiderIQ is being built to understand how AI-assisted buyers narrow options, add constraints, compare alternatives, and decide which brands stay in the conversation.",
-  primaryCta: "Request Beta Access",
-  betaStatus: "Private Research Beta",
+    "ConsiderIQ is built to understand how AI-assisted buyers narrow options, add constraints, compare alternatives, and decide which brands stay in the conversation.",
+  primaryCta: "Start Free",
 };
+

@@ -87,7 +87,7 @@ export default async function SettingsPage() {
               <div className="space-y-0.5">
                 <span className="font-semibold text-foreground block">Google Gemini</span>
                 <span className="text-muted-foreground text-[11px]">
-                  Default production engine for buyer decision simulations (gemini-2.5-flash)
+                  Default production engine for buyer decision simulations (gemini-3.8-flash)
                 </span>
               </div>
               <Badge variant="success" className="text-[10px] font-mono py-0">

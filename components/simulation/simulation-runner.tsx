@@ -45,7 +45,21 @@ export function SimulationRunner({ projects, initialProjectId }: SimulationRunne
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMessage(data.error || "Simulation run could not be completed.");
+        let msg = data.error || `Simulation failed (HTTP ${res.status}).`;
+        if (data.errorType === "auth") {
+          msg = "Authentication session expired. Please sign in again to run simulations.";
+        } else if (data.errorType === "gemini_configuration") {
+          msg = "Google Gemini is not configured. Please set GEMINI_API_KEY in your server environment.";
+        } else if (data.errorType === "gemini_provider") {
+          msg = `Simulation failed (HTTP ${res.status}) - Gemini Provider Error${data.turnIndex ? ` at Turn ${data.turnIndex} (${data.stage})` : ""}: ${data.error}`;
+        } else if (data.errorType === "database") {
+          msg = `Simulation failed (HTTP ${res.status}) - Database persistence failure: Unable to save simulation records.`;
+        } else if (data.errorType === "timeout" || res.status === 504) {
+          msg = `Simulation failed (HTTP ${res.status}). The simulation exceeded the server execution limit or timed out.`;
+        } else if (data.error) {
+          msg = `Simulation failed (HTTP ${res.status}): ${data.error}`;
+        }
+        setErrorMessage(msg);
         setIsRunning(false);
         setCurrentStage(null);
         return;
@@ -54,8 +68,12 @@ export function SimulationRunner({ projects, initialProjectId }: SimulationRunne
       setCurrentStage("Simulation complete. Redirecting to Decision Trail...");
       router.push(`/app/simulations/${data.simulationId}`);
       router.refresh();
-    } catch {
-      setErrorMessage("A network or server error occurred during the simulation. Please try again.");
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") {
+        setErrorMessage("Simulation request timed out. Please try again.");
+      } else {
+        setErrorMessage("Network connection error: Unable to reach the simulation server. Please check your connection and try again.");
+      }
       setIsRunning(false);
       setCurrentStage(null);
     }
@@ -173,7 +191,7 @@ export function SimulationRunner({ projects, initialProjectId }: SimulationRunne
           <div className="flex items-center gap-2">
             <Cpu className="h-4 w-4 text-primary" />
             <span className="text-sm font-semibold text-foreground">
-              gemini-2.5-flash
+              gemini-3.8-flash
             </span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
