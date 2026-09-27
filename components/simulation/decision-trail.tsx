@@ -24,33 +24,38 @@ interface DecisionTrailProps {
   className?: string;
 }
 
+const STAGE_ICONS = {
+  QUESTION: HelpCircle,
+  CONSTRAINT: Filter,
+  SHORTLIST: ListFilter,
+  ELIMINATION: AlertTriangle,
+  RECOMMENDATION: Award,
+};
+
+const STAGE_SUBTITLES: Record<string, string> = {
+  QUESTION: "Broad Category Discovery Search",
+  CONSTRAINT: "Operational & Workflow Filter",
+  SHORTLIST: "Comparative Shortlist Synthesis",
+  ELIMINATION: "Critical Governance & Drop Point",
+  RECOMMENDATION: "Winning Vendor Recommendation",
+};
+
 export function DecisionTrail({ turns, project, className }: DecisionTrailProps) {
   // Default active turn to the elimination turn if present, else turn 1
-  const eliminationTurn = turns.find(
-    (t) => t.stage === "ELIMINATION" || t.brands?.some((b) => b.isYourBrand && b.status === "eliminated")
-  );
-  const defaultTurnId = eliminationTurn ? eliminationTurn.id : (turns[0] ? turns[0].id : "");
+  const defaultTurnId = React.useMemo(() => {
+    const eliminationTurn = turns.find(
+      (t) => t.stage === "ELIMINATION" || t.brands?.some((b) => b.isYourBrand && b.status === "eliminated")
+    );
+    return eliminationTurn ? eliminationTurn.id : (turns[0] ? turns[0].id : "");
+  }, [turns]);
 
   const [activeTurnId, setActiveTurnId] = React.useState<string>(defaultTurnId);
   const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
 
-  const activeTurn = turns.find((t) => t.id === activeTurnId) || turns[0];
-
-  const stageIcons = {
-    QUESTION: HelpCircle,
-    CONSTRAINT: Filter,
-    SHORTLIST: ListFilter,
-    ELIMINATION: AlertTriangle,
-    RECOMMENDATION: Award,
-  };
-
-  const stageSubtitles: Record<string, string> = {
-    QUESTION: "Broad Category Discovery Search",
-    CONSTRAINT: "Operational & Workflow Filter",
-    SHORTLIST: "Comparative Shortlist Synthesis",
-    ELIMINATION: "Critical Governance & Drop Point",
-    RECOMMENDATION: "Winning Vendor Recommendation",
-  };
+  const activeTurn = React.useMemo(
+    () => turns.find((t) => t.id === activeTurnId) || turns[0],
+    [turns, activeTurnId]
+  );
 
   if (!turns || turns.length === 0) {
     return null;
@@ -92,7 +97,7 @@ export function DecisionTrail({ turns, project, className }: DecisionTrailProps)
 
             <div className="space-y-1 relative" role="tablist" aria-label="Decision Trail Steps">
               {turns.map((turn) => {
-                const Icon = stageIcons[turn.stage] || HelpCircle;
+                const Icon = STAGE_ICONS[turn.stage] || HelpCircle;
                 const isSelected = turn.id === activeTurnId;
                 const yourBrandInTurn = turn.brands?.find((b) => b.isYourBrand);
                 const wasYourBrandEliminated = yourBrandInTurn?.status === "eliminated";
@@ -145,7 +150,7 @@ export function DecisionTrail({ turns, project, className }: DecisionTrailProps)
                         {turn.stage.charAt(0) + turn.stage.slice(1).toLowerCase()} Stage
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {stageSubtitles[turn.stage] || "Procurement Dialogue Step"}
+                        {STAGE_SUBTITLES[turn.stage] || "Procurement Dialogue Step"}
                       </div>
                     </div>
 
@@ -172,7 +177,7 @@ export function DecisionTrail({ turns, project, className }: DecisionTrailProps)
                       Turn {activeTurn.turn_index} of {turns.length} · Stage: {activeTurn.stage}
                     </span>
                     <h3 className="text-lg font-semibold text-foreground">
-                      {stageSubtitles[activeTurn.stage] || activeTurn.stage}
+                      {STAGE_SUBTITLES[activeTurn.stage] || activeTurn.stage}
                     </h3>
                   </div>
                   <Badge

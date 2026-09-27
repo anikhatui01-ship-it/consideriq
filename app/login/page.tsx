@@ -26,8 +26,17 @@ function LoginForm() {
   const [failedAttempts, setFailedAttempts] = React.useState(0);
   const [lockoutUntil, setLockoutUntil] = React.useState<number | null>(null);
 
+  // Synchronous lock against rapid multi-clicking
+  const isSubmittingRef = React.useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent duplicate submission synchronously
+    if (isSubmittingRef.current || loading) {
+      return;
+    }
+
     setErrorMessage(null);
 
     // Check client-side brute-force lockout
@@ -37,6 +46,7 @@ function LoginForm() {
       return;
     }
 
+    isSubmittingRef.current = true;
     setLoading(true);
 
     try {
@@ -47,6 +57,7 @@ function LoginForm() {
       });
 
       if (error) {
+        isSubmittingRef.current = false;
         const nextFails = failedAttempts + 1;
         setFailedAttempts(nextFails);
 
@@ -65,9 +76,10 @@ function LoginForm() {
       // Reset failed attempts on success
       setFailedAttempts(0);
       setLockoutUntil(null);
+      // Keep isSubmittingRef.current = true and loading = true during navigation to avoid layout shift or button flicker
       router.push(redirectPath);
-      router.refresh();
     } catch {
+      isSubmittingRef.current = false;
       setErrorMessage("An unexpected network error occurred. Please try again.");
       setLoading(false);
     }
@@ -89,7 +101,7 @@ function LoginForm() {
         <CardContent>
           {errorMessage && (
             <div
-              className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2"
+              className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2 animate-in fade-in-0 duration-200"
               role="alert"
             >
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -97,57 +109,65 @@ function LoginForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="email">
-                Work Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="password">
-                  Password
+          <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading}>
+            <fieldset disabled={loading} className="space-y-4 border-0 p-0 m-0 disabled:cursor-not-allowed">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="email">
+                  Work Email
                 </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary hover:underline font-medium"
-                >
-                  Forgot password?
-                </Link>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
               </div>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-            </div>
 
-            <Button type="submit" className="w-full h-10 font-medium" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="password">
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    tabIndex={loading ? -1 : undefined}
+                    className={`text-xs text-primary hover:underline font-medium ${loading ? "pointer-events-none opacity-50" : ""}`}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-10 font-medium select-none"
+                disabled={loading}
+                aria-disabled={loading}
+              >
+                {loading ? (
+                  <span className="inline-flex items-center justify-center gap-2" role="status">
+                    <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                    <span>Signing in...</span>
+                  </span>
+                ) : (
+                  "Sign in"
+                )}
+              </Button>
+            </fieldset>
           </form>
 
           <div className="mt-6 pt-4 border-t border-border text-center text-xs text-muted-foreground">

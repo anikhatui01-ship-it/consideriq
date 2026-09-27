@@ -22,94 +22,98 @@ interface BrandSurvivalStats {
 }
 
 export function CompetitorMatrix({ turns, project }: CompetitorMatrixProps) {
-  // Aggregate brand performance across turns
-  const brandMap = new Map<string, BrandSurvivalStats>();
+  // Aggregate brand performance across turns with memoization
+  const brandList = React.useMemo(() => {
+    const brandMap = new Map<string, BrandSurvivalStats>();
 
-  // Ensure tracked brand is always present
-  brandMap.set(project.name.toLowerCase(), {
-    name: project.name,
-    isYourBrand: true,
-    discovered: false,
-    survivedConstraint: false,
-    shortlisted: false,
-    survivedElimination: false,
-    recommended: false,
-    finalStatus: "eliminated",
-  });
-
-  // Initialize competitors
-  if (project.competitors) {
-    project.competitors.forEach((comp) => {
-      brandMap.set(comp.toLowerCase(), {
-        name: comp,
-        isYourBrand: false,
-        discovered: false,
-        survivedConstraint: false,
-        shortlisted: false,
-        survivedElimination: false,
-        recommended: false,
-        finalStatus: "eliminated",
-      });
+    // Ensure tracked brand is always present
+    brandMap.set(project.name.toLowerCase(), {
+      name: project.name,
+      isYourBrand: true,
+      discovered: false,
+      survivedConstraint: false,
+      shortlisted: false,
+      survivedElimination: false,
+      recommended: false,
+      finalStatus: "eliminated",
     });
-  }
 
-  // Populate from turns
-  turns.forEach((turn) => {
-    turn.brands?.forEach((b) => {
-      const key = b.name.toLowerCase();
-      let stats = brandMap.get(key);
-      if (!stats) {
-        stats = {
-          name: b.name,
-          isYourBrand: Boolean(b.isYourBrand || key === project.name.toLowerCase()),
+    // Initialize competitors
+    if (project.competitors) {
+      project.competitors.forEach((comp) => {
+        brandMap.set(comp.toLowerCase(), {
+          name: comp,
+          isYourBrand: false,
           discovered: false,
           survivedConstraint: false,
           shortlisted: false,
           survivedElimination: false,
           recommended: false,
           finalStatus: "eliminated",
-        };
-        brandMap.set(key, stats);
-      }
-
-      if (turn.stage === "QUESTION" && b.status !== "eliminated") {
-        stats.discovered = true;
-      }
-      if (turn.stage === "CONSTRAINT" && b.status !== "eliminated") {
-        stats.survivedConstraint = true;
-      }
-      if (turn.stage === "SHORTLIST" && b.status !== "eliminated") {
-        stats.shortlisted = true;
-      }
-      if (turn.stage === "ELIMINATION" && b.status !== "eliminated") {
-        stats.survivedElimination = true;
-      }
-      if (turn.stage === "RECOMMENDATION" && b.status === "recommended") {
-        stats.recommended = true;
-      }
-    });
-  });
-
-  // Calculate final status
-  const brandList = Array.from(brandMap.values()).map((b) => {
-    if (b.recommended) {
-      b.finalStatus = "recommended";
-    } else if (b.survivedElimination) {
-      b.finalStatus = "survived";
-    } else {
-      b.finalStatus = "eliminated";
+        });
+      });
     }
-    return b;
-  });
 
-  // Sort: Tracked brand first, then recommended, then survived, then eliminated
-  brandList.sort((a, b) => {
-    if (a.isYourBrand) return -1;
-    if (b.isYourBrand) return 1;
-    if (a.recommended && !b.recommended) return -1;
-    if (!a.recommended && b.recommended) return 1;
-    return a.name.localeCompare(b.name);
-  });
+    // Populate from turns
+    turns.forEach((turn) => {
+      turn.brands?.forEach((b) => {
+        const key = b.name.toLowerCase();
+        let stats = brandMap.get(key);
+        if (!stats) {
+          stats = {
+            name: b.name,
+            isYourBrand: Boolean(b.isYourBrand || key === project.name.toLowerCase()),
+            discovered: false,
+            survivedConstraint: false,
+            shortlisted: false,
+            survivedElimination: false,
+            recommended: false,
+            finalStatus: "eliminated",
+          };
+          brandMap.set(key, stats);
+        }
+
+        if (turn.stage === "QUESTION" && b.status !== "eliminated") {
+          stats.discovered = true;
+        }
+        if (turn.stage === "CONSTRAINT" && b.status !== "eliminated") {
+          stats.survivedConstraint = true;
+        }
+        if (turn.stage === "SHORTLIST" && b.status !== "eliminated") {
+          stats.shortlisted = true;
+        }
+        if (turn.stage === "ELIMINATION" && b.status !== "eliminated") {
+          stats.survivedElimination = true;
+        }
+        if (turn.stage === "RECOMMENDATION" && b.status === "recommended") {
+          stats.recommended = true;
+        }
+      });
+    });
+
+    // Calculate final status
+    const list = Array.from(brandMap.values()).map((b) => {
+      if (b.recommended) {
+        b.finalStatus = "recommended";
+      } else if (b.survivedElimination) {
+        b.finalStatus = "survived";
+      } else {
+        b.finalStatus = "eliminated";
+      }
+      return b;
+    });
+
+    // Sort: Tracked brand first, then recommended, then survived, then eliminated
+    list.sort((a, b) => {
+      if (a.isYourBrand) return -1;
+      if (b.isYourBrand) return 1;
+      if (a.recommended && !b.recommended) return -1;
+      if (!a.recommended && b.recommended) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    return list;
+  }, [turns, project.name, project.competitors]);
 
   return (
     <div className="rounded-xl border border-border bg-surface overflow-hidden shadow-subtle">

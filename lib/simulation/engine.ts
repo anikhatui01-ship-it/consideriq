@@ -35,6 +35,11 @@ export interface SimulationExecutionResult {
   };
 }
 
+export type TurnCompletionCallback = (
+  turn: SimulationTurnResult,
+  timing: SimulationTiming
+) => Promise<void>;
+
 export class SimulationEngine {
   private provider: AIProvider;
 
@@ -42,7 +47,10 @@ export class SimulationEngine {
     this.provider = provider || getProvider("gemini");
   }
 
-  async runSimulation(project: Project): Promise<SimulationExecutionResult> {
+  async runSimulation(
+    project: Project,
+    onTurnComplete?: TurnCompletionCallback
+  ): Promise<SimulationExecutionResult> {
     if (!this.provider.isConfigured()) {
       throw new Error(
         "AI provider is not configured. Please set GEMINI_API_KEY in your server environment."
@@ -143,11 +151,12 @@ You MUST output your response as a valid JSON object matching the provided schem
       }
 
       const turnDurationMs = Date.now() - turnStart;
-      turnDurations.push({
+      const timing: SimulationTiming = {
         turnIndex: plan.turnIndex,
         stage: plan.stage,
         durationMs: turnDurationMs,
-      });
+      };
+      turnDurations.push(timing);
       console.log(`[Simulation] Turn ${plan.turnIndex} (${plan.stage}) completed in ${turnDurationMs}ms`);
 
       // Parse structured JSON with deterministic fallback
@@ -170,7 +179,7 @@ You MUST output your response as a valid JSON object matching the provided schem
         classification = "INFERRED";
       }
 
-      turnsResults.push({
+      const turnResult: SimulationTurnResult = {
         turnIndex: plan.turnIndex,
         stage: plan.stage,
         title: plan.title,
@@ -181,7 +190,21 @@ You MUST output your response as a valid JSON object matching the provided schem
         citations: parsedData.citations,
         insight: parsedData.insight,
         classification,
-      });
+      };
+
+      turnsResults.push(turnResult);
+
+      if (onTurnComplete) {
+        try {
+          await onTurnComplete(turnResult, timing);
+        } catch (callbackErr: unknown) {
+          if (callbackErr instanceof Error) {
+            (callbackErr as { turnIndex?: number }).turnIndex = plan.turnIndex;
+            (callbackErr as { stage?: string }).stage = plan.stage;
+          }
+          throw callbackErr;
+        }
+      }
     }
 
     const totalDurationMs = Date.now() - totalStart;

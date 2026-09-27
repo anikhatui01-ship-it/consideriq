@@ -19,8 +19,15 @@ export default function ResetPasswordPage() {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
+  const isSubmittingRef = React.useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSubmittingRef.current || loading) {
+      return;
+    }
+
     setErrorMessage(null);
 
     if (password.length < 6) {
@@ -33,6 +40,7 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    isSubmittingRef.current = true;
     setLoading(true);
 
     try {
@@ -42,6 +50,7 @@ export default function ResetPasswordPage() {
       });
 
       if (error) {
+        isSubmittingRef.current = false;
         setErrorMessage(error.message || "Failed to update password.");
         setLoading(false);
         return;
@@ -51,8 +60,9 @@ export default function ResetPasswordPage() {
       setLoading(false);
       setTimeout(() => {
         router.push("/login");
-      }, 2000);
+      }, 1500);
     } catch {
+      isSubmittingRef.current = false;
       setErrorMessage("An unexpected network error occurred. Please try again.");
       setLoading(false);
     }
@@ -75,7 +85,7 @@ export default function ResetPasswordPage() {
           <CardContent>
             {errorMessage && (
               <div
-                className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2"
+                className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2 animate-in fade-in-0 duration-200"
                 role="alert"
               >
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -85,7 +95,7 @@ export default function ResetPasswordPage() {
 
             {successMessage && (
               <div
-                className="mb-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs flex items-start gap-2"
+                className="mb-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs flex items-start gap-2 animate-in fade-in-0 duration-200"
                 role="status"
               >
                 <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
@@ -94,49 +104,56 @@ export default function ResetPasswordPage() {
             )}
 
             {!successMessage && (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="password">
-                    New Password
-                  </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    placeholder="At least 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
+              <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading}>
+                <fieldset disabled={loading} className="space-y-4 border-0 p-0 m-0 disabled:cursor-not-allowed">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="password">
+                      New Password
+                    </label>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      placeholder="At least 6 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="confirmPassword">
-                    Confirm New Password
-                  </label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    placeholder="Re-enter new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="confirmPassword">
+                      Confirm New Password
+                    </label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      placeholder="Re-enter new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
 
-                <Button type="submit" className="w-full h-10 font-medium" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating password...
-                    </>
-                  ) : (
-                    "Update password"
-                  )}
-                </Button>
+                  <Button
+                    type="submit"
+                    className="w-full h-10 font-medium select-none"
+                    disabled={loading}
+                    aria-disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="inline-flex items-center justify-center gap-2" role="status">
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <span>Updating password...</span>
+                      </span>
+                    ) : (
+                      "Update password"
+                    )}
+                  </Button>
+                </fieldset>
               </form>
             )}
 

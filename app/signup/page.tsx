@@ -17,11 +17,21 @@ export default function SignupPage() {
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [navigating, setNavigating] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
+  // Synchronous lock against rapid multi-clicking
+  const isSubmittingRef = React.useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent duplicate submission synchronously
+    if (isSubmittingRef.current || loading || navigating) {
+      return;
+    }
+
     setErrorMessage(null);
     setSuccessMessage(null);
 
@@ -35,6 +45,7 @@ export default function SignupPage() {
       return;
     }
 
+    isSubmittingRef.current = true;
     setLoading(true);
 
     try {
@@ -45,6 +56,7 @@ export default function SignupPage() {
       });
 
       if (error) {
+        isSubmittingRef.current = false;
         setErrorMessage(error.message || "Failed to create account.");
         setLoading(false);
         return;
@@ -52,17 +64,18 @@ export default function SignupPage() {
 
       // If user session is returned immediately (email confirmation disabled in Supabase)
       if (data.session) {
+        setNavigating(true);
         router.push("/app");
-        router.refresh();
+        // Keep loading/navigating active while Next.js finishes navigation
         return;
       }
 
       // If email confirmation is required by Supabase project
-      setSuccessMessage(
-        "Account created! Please check your email to confirm your account, then sign in."
-      );
+      isSubmittingRef.current = false;
+      setSuccessMessage("Account created. Check your email to confirm your account.");
       setLoading(false);
     } catch {
+      isSubmittingRef.current = false;
       setErrorMessage("An unexpected network error occurred. Please try again.");
       setLoading(false);
     }
@@ -85,7 +98,7 @@ export default function SignupPage() {
           <CardContent>
             {errorMessage && (
               <div
-                className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2"
+                className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2 animate-in fade-in-0 duration-200"
                 role="alert"
               >
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -93,76 +106,98 @@ export default function SignupPage() {
               </div>
             )}
 
-            {successMessage && (
-              <div
-                className="mb-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs flex items-start gap-2"
-                role="status"
-              >
-                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>{successMessage}</span>
+            {successMessage ? (
+              <div className="space-y-4 py-2 animate-in fade-in-0 duration-200" role="status">
+                <div className="p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs space-y-2">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="text-sm font-bold">Account created. Check your email to confirm your account.</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed pl-7">
+                    A confirmation link was sent to <strong className="text-foreground">{email}</strong>. Once confirmed, you can sign in to access your simulations.
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <Button asChild className="w-full h-10 font-medium">
+                    <Link href="/login">
+                      <span>Proceed to Sign In</span>
+                    </Link>
+                  </Button>
+                </div>
               </div>
-            )}
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading || navigating}>
+                <fieldset disabled={loading || navigating} className="space-y-4 border-0 p-0 m-0 disabled:cursor-not-allowed">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="email">
+                      Work Email
+                    </label>
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      placeholder="you@company.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading || navigating}
+                    />
+                  </div>
 
-            {!successMessage && (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="email">
-                    Work Email
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    placeholder="you@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="password">
+                      Password
+                    </label>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      placeholder="At least 6 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading || navigating}
+                    />
+                  </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="password">
-                    Password
-                  </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    placeholder="At least 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="confirmPassword">
+                      Confirm Password
+                    </label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      placeholder="Re-enter password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={loading || navigating}
+                    />
+                  </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="confirmPassword">
-                    Confirm Password
-                  </label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    placeholder="Re-enter password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full h-10 font-medium" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
-                  ) : (
-                    "Create account"
-                  )}
-                </Button>
+                  <Button
+                    type="submit"
+                    className="w-full h-10 font-medium select-none"
+                    disabled={loading || navigating}
+                    aria-disabled={loading || navigating}
+                  >
+                    {navigating ? (
+                      <span className="inline-flex items-center justify-center gap-2" role="status">
+                        <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                        <span>Opening ConsiderIQ...</span>
+                      </span>
+                    ) : loading ? (
+                      <span className="inline-flex items-center justify-center gap-2" role="status">
+                        <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                        <span>Creating account...</span>
+                      </span>
+                    ) : (
+                      "Create account"
+                    )}
+                  </Button>
+                </fieldset>
               </form>
             )}
 

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { SimulationEngine } from "@/lib/simulation/engine";
+import { SimulationEngine, SimulationTurnResult } from "@/lib/simulation/engine";
 import { getProvider } from "@/lib/providers";
-import { Project } from "@/lib/types/database";
+import { Project, DecisionStage } from "@/lib/types/database";
 import { rateLimiter, RATE_LIMITS } from "@/lib/security/rate-limit";
 
+export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -144,120 +145,226 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 7. Execute the simulation engine with safe error containment
-  const engine = new SimulationEngine(provider);
+  // 7. Execute the simulation engine with streaming response
+  const encoder = new TextEncoder();
 
-  try {
-    const result = await engine.runSimulation(project);
-
-    // 8. Store turns in simulation_turns table
-    const turnsToInsert = result.turns.map((t) => ({
-      simulation_id: simulation.id,
-      user_id: user.id,
-      turn_index: t.turnIndex,
-      stage: t.stage,
-      buyer_prompt: t.buyerPrompt,
-      observed_response: t.observedResponse,
-      brands: t.brands,
-      citations: t.citations,
-      insight: t.insight,
-      classification: t.classification,
-    }));
-
-    const { error: turnsError } = await supabase
-      .from("simulation_turns")
-      .insert(turnsToInsert);
-
-    if (turnsError) {
-      console.error("[Simulation Persistence] turns insert failed", {
-        code: turnsError.code,
-        message: turnsError.message,
-      });
-      throw new Error("DATABASE_PERSISTENCE_ERROR: Failed to persist simulation turns.");
-    }
-
-    // 9. Update simulation status and calculated metrics
-    const { error: updateError } = await supabase
-      .from("simulations")
-      .update({
-        status: "completed",
-        visibility_rate: result.visibilityRate,
-        shortlist_rate: result.shortlistRate,
-        recommendation_rate: result.recommendationRate,
-        elimination_rate: result.eliminationRate,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", simulation.id)
-      .eq("user_id", user.id);
-
-    if (updateError) {
-      console.error("[Simulation Persistence] final status update failed", {
-        code: updateError.code,
-        message: updateError.message,
-      });
-      throw new Error("DATABASE_PERSISTENCE_ERROR: Failed to finalize simulation status.");
-    }
-
-    return NextResponse.json({
-      success: true,
-      simulationId: simulation.id,
-      result,
-    });
-  } catch (err: unknown) {
-    let safeMessage = "Simulation execution encountered an error.";
-    let errorType: "gemini_provider" | "database" | "timeout" | "unknown" = "unknown";
-    let turnIndex: number | undefined;
-    let stage: string | undefined;
-
-    if (err instanceof Error) {
-      const errMsg = err.message;
-      if (errMsg.includes("DATABASE_PERSISTENCE_ERROR")) {
-        safeMessage = "Unable to save simulation results to the database. Please try again.";
-        errorType = "database";
-      } else if (errMsg.includes("provider error") || errMsg.includes("Gemini simulation failed")) {
-        errorType = "gemini_provider";
-        safeMessage = errMsg
-          .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
-          .slice(0, 300);
-      } else if (errMsg.includes("timeout") || errMsg.includes("aborted")) {
-        errorType = "timeout";
-        safeMessage = "Simulation timed out while awaiting AI provider response.";
-      } else {
-        safeMessage = errMsg
-          .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
-          .slice(0, 300);
+  type SimulationStreamEvent =
+    | {
+        type: "started";
+        simulationId: string;
+        totalTurns: number;
       }
+    | {
+        type: "turn_completed";
+        simulationId: string;
+        turnIndex: number;
+        stage: DecisionStage;
+        turn: SimulationTurnResult;
+      }
+    | {
+        type: "turn_failed";
+        simulationId: string;
+        turnIndex: number;
+        stage: string;
+        error: string;
+      }
+    | {
+        type: "completed";
+        simulationId: string;
+        metrics: {
+          visibilityRate: number;
+          shortlistRate: number;
+          recommendationRate: number;
+          eliminationRate: number;
+          eliminatedAtTurn: number | null;
+        };
+        timings?: {
+          totalDurationMs: number;
+          turnDurations: { turnIndex: number; stage: DecisionStage; durationMs: number }[];
+        };
+      }
+    | {
+        type: "failed";
+        simulationId: string;
+        errorType: string;
+        error: string;
+      };
 
-      turnIndex = (err as { turnIndex?: number }).turnIndex;
-      stage = (err as { stage?: string }).stage;
-    }
+  const stream = new ReadableStream({
+    async start(controller) {
+      const sendEvent = (event: SimulationStreamEvent) => {
+        try {
+          controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+        } catch (streamErr) {
+          console.error("[Simulation Stream] Enqueue error:", streamErr);
+        }
+      };
 
-    console.error("[Simulation Run Failed]", {
-      simulationId: simulation.id,
-      errorType,
-      turnIndex,
-      stage,
-      message: safeMessage,
-    });
+      // 1. Emit started
+      sendEvent({
+        type: "started",
+        simulationId: simulation.id,
+        totalTurns: 5,
+      });
 
-    // Update simulation status to failed
-    await supabase
-      .from("simulations")
-      .update({
-        status: "failed",
-        error_message: safeMessage,
-      })
-      .eq("id", simulation.id)
-      .eq("user_id", user.id);
+      const engine = new SimulationEngine(provider);
 
-    return NextResponse.json(
-      {
-        error: safeMessage,
-        errorType,
-        turnIndex,
-        stage,
-      },
-      { status: 500 }
-    );
-  }
+      try {
+        const result = await engine.runSimulation(
+          project,
+          async (turnResult: SimulationTurnResult) => {
+            // 2. Persist turn to simulation_turns immediately
+            const { error: turnError } = await supabase
+              .from("simulation_turns")
+              .insert({
+                simulation_id: simulation.id,
+                user_id: user.id,
+                turn_index: turnResult.turnIndex,
+                stage: turnResult.stage,
+                buyer_prompt: turnResult.buyerPrompt,
+                observed_response: turnResult.observedResponse,
+                brands: turnResult.brands,
+                citations: turnResult.citations,
+                insight: turnResult.insight,
+                classification: turnResult.classification,
+              });
+
+            if (turnError) {
+              console.error("[Simulation Persistence] Turn insert failed:", {
+                simulationId: simulation.id,
+                turnIndex: turnResult.turnIndex,
+                code: turnError.code,
+                message: turnError.message,
+              });
+              const dbErr = new Error("DATABASE_PERSISTENCE_ERROR: Failed to persist simulation turn.");
+              (dbErr as { turnIndex?: number }).turnIndex = turnResult.turnIndex;
+              (dbErr as { stage?: string }).stage = turnResult.stage;
+              throw dbErr;
+            }
+
+            // 3. Emit turn_completed
+            sendEvent({
+              type: "turn_completed",
+              simulationId: simulation.id,
+              turnIndex: turnResult.turnIndex,
+              stage: turnResult.stage,
+              turn: turnResult,
+            });
+          }
+        );
+
+        // Update simulation status to completed and persist calculated metrics
+        const { error: updateError } = await supabase
+          .from("simulations")
+          .update({
+            status: "completed",
+            visibility_rate: result.visibilityRate,
+            shortlist_rate: result.shortlistRate,
+            recommendation_rate: result.recommendationRate,
+            elimination_rate: result.eliminationRate,
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", simulation.id)
+          .eq("user_id", user.id);
+
+        if (updateError) {
+          console.error("[Simulation Persistence] Final status update failed:", {
+            simulationId: simulation.id,
+            code: updateError.code,
+            message: updateError.message,
+          });
+          throw new Error("DATABASE_PERSISTENCE_ERROR: Failed to finalize simulation status.");
+        }
+
+        // 4. Emit completed
+        sendEvent({
+          type: "completed",
+          simulationId: simulation.id,
+          metrics: {
+            visibilityRate: result.visibilityRate,
+            shortlistRate: result.shortlistRate,
+            recommendationRate: result.recommendationRate,
+            eliminationRate: result.eliminationRate,
+            eliminatedAtTurn: result.eliminatedAtTurn,
+          },
+          timings: result.timings,
+        });
+      } catch (err: unknown) {
+        let safeMessage = "Simulation execution encountered an error.";
+        let errorType: "gemini_provider" | "database" | "timeout" | "unknown" = "unknown";
+        let turnIndex: number | undefined;
+        let stage: string | undefined;
+
+        if (err instanceof Error) {
+          const errMsg = err.message;
+          if (errMsg.includes("DATABASE_PERSISTENCE_ERROR")) {
+            safeMessage = "Unable to save simulation results to the database. Please try again.";
+            errorType = "database";
+          } else if (errMsg.includes("provider error") || errMsg.includes("Gemini simulation failed")) {
+            errorType = "gemini_provider";
+            safeMessage = errMsg
+              .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
+              .slice(0, 300);
+          } else if (errMsg.includes("timeout") || errMsg.includes("aborted")) {
+            errorType = "timeout";
+            safeMessage = "Simulation timed out while awaiting AI provider response.";
+          } else {
+            safeMessage = errMsg
+              .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
+              .slice(0, 300);
+          }
+
+          turnIndex = (err as { turnIndex?: number }).turnIndex;
+          stage = (err as { stage?: string }).stage;
+        }
+
+        console.error("[Simulation Run Failed]", {
+          simulationId: simulation.id,
+          errorType,
+          turnIndex,
+          stage,
+          message: safeMessage,
+        });
+
+        // Emit turn_failed if a specific turn failed
+        if (turnIndex !== undefined) {
+          sendEvent({
+            type: "turn_failed",
+            simulationId: simulation.id,
+            turnIndex,
+            stage: stage || "UNKNOWN",
+            error: safeMessage,
+          });
+        }
+
+        // Mark simulation failed in database without deleting already-persisted turns
+        await supabase
+          .from("simulations")
+          .update({
+            status: "failed",
+            error_message: safeMessage,
+          })
+          .eq("id", simulation.id)
+          .eq("user_id", user.id);
+
+        // 5. Emit failed
+        sendEvent({
+          type: "failed",
+          simulationId: simulation.id,
+          errorType,
+          error: safeMessage,
+        });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
 }

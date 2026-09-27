@@ -20,9 +20,19 @@ export default function NewProjectPage() {
   const [loading, setLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
+  // Synchronous lock against rapid multi-clicking
+  const isSubmittingRef = React.useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent duplicate submissions synchronously
+    if (isSubmittingRef.current || loading) {
+      return;
+    }
+
     setErrorMessage(null);
+    isSubmittingRef.current = true;
     setLoading(true);
 
     // Parse comma-separated competitors
@@ -54,14 +64,16 @@ export default function NewProjectPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        isSubmittingRef.current = false;
         setErrorMessage(data.error || `Failed to create project (HTTP ${res.status}).`);
         setLoading(false);
         return;
       }
 
+      // Keep isSubmittingRef and loading true during navigation to prevent multiple clicks
       router.push(`/app/projects/${data.project.id}`);
-      router.refresh();
     } catch {
+      isSubmittingRef.current = false;
       setErrorMessage("Network error occurred while creating project.");
       setLoading(false);
     }
@@ -86,7 +98,7 @@ export default function NewProjectPage() {
         <CardContent>
           {errorMessage && (
             <div
-              className="mb-5 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2"
+              className="mb-5 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2 animate-in fade-in-0 duration-200"
               role="alert"
             >
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -94,132 +106,142 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Brand Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="name">
-                Brand Name <span className="text-primary">*</span>
-              </label>
-              <Input
-                id="name"
-                required
-                placeholder="e.g. Acme Alerting"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading}>
+            <fieldset disabled={loading} className="space-y-5 border-0 p-0 m-0 disabled:cursor-not-allowed">
+              {/* Brand Name */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="name">
+                  Brand Name <span className="text-primary">*</span>
+                </label>
+                <Input
+                  id="name"
+                  required
+                  placeholder="e.g. Acme Alerting"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
 
-            {/* Website URL */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="website">
-                Brand Website URL <span className="text-primary">*</span>
-              </label>
-              <Input
-                id="website"
-                type="url"
-                required
-                placeholder="https://acme.com"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                disabled={loading}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Public website domain used for grounding and reference extraction.
-              </p>
-            </div>
+              {/* Website URL */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="website">
+                  Brand Website URL <span className="text-primary">*</span>
+                </label>
+                <Input
+                  id="website"
+                  type="url"
+                  required
+                  placeholder="https://acme.com"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Public website domain used for grounding and reference extraction.
+                </p>
+              </div>
 
-            {/* Relevant Category */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="category">
-                Relevant Category / Market <span className="text-primary">*</span>
-              </label>
-              <Input
-                id="category"
-                required
-                placeholder="e.g. Modern Incident Response & On-Call Alert Routing"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                disabled={loading}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                The software category unbranded buyers search for during discovery.
-              </p>
-            </div>
+              {/* Relevant Category */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="category">
+                  Relevant Category / Market <span className="text-primary">*</span>
+                </label>
+                <Input
+                  id="category"
+                  required
+                  placeholder="e.g. Modern Incident Response & On-Call Alert Routing"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  The software category unbranded buyers search for during discovery.
+                </p>
+              </div>
 
-            {/* Competitors */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="competitors">
-                Known Competitors (comma-separated)
-              </label>
-              <Input
-                id="competitors"
-                placeholder="PagerDuty, Opsgenie, Rootly, FireHydrant"
-                value={competitors}
-                onChange={(e) => setCompetitors(e.target.value)}
-                disabled={loading}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Competitors whose consideration share will be compared against your brand.
-              </p>
-            </div>
+              {/* Competitors */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="competitors">
+                  Known Competitors (comma-separated)
+                </label>
+                <Input
+                  id="competitors"
+                  placeholder="PagerDuty, Opsgenie, Rootly, FireHydrant"
+                  value={competitors}
+                  onChange={(e) => setCompetitors(e.target.value)}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Competitors whose consideration share will be compared against your brand.
+                </p>
+              </div>
 
-            {/* Buyer Persona / ICP */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="targetPersona">
-                Target Buyer Persona / ICP <span className="text-primary">*</span>
-              </label>
-              <textarea
-                id="targetPersona"
-                required
-                rows={3}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="e.g. VP of Engineering or Head of DevOps at a 50-person B2B SaaS looking for modern Slack-native on-call rotations without enterprise complexity."
-                value={targetPersona}
-                onChange={(e) => setTargetPersona(e.target.value)}
-                disabled={loading}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Specifies who the simulated buyer is, their company context, and authority level.
-              </p>
-            </div>
+              {/* Buyer Persona / ICP */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="targetPersona">
+                  Target Buyer Persona / ICP <span className="text-primary">*</span>
+                </label>
+                <textarea
+                  id="targetPersona"
+                  required
+                  rows={3}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="e.g. VP of Engineering or Head of DevOps at a 50-person B2B SaaS looking for modern Slack-native on-call rotations without enterprise complexity."
+                  value={targetPersona}
+                  onChange={(e) => setTargetPersona(e.target.value)}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Specifies who the simulated buyer is, their company context, and authority level.
+                </p>
+              </div>
 
-            {/* Optional Buyer Constraints */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="constraints">
-                Optional Buyer Constraints (comma-separated)
-              </label>
-              <Input
-                id="constraints"
-                placeholder="e.g. SOC 2 Type II, SCIM provisioning, Slack bidirectional sync, under $40/user/mo"
-                value={constraints}
-                onChange={(e) => setConstraints(e.target.value)}
-                disabled={loading}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Specific architectural, compliance, or budget filters introduced in later turns.
-              </p>
-            </div>
+              {/* Optional Buyer Constraints */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor="constraints">
+                  Optional Buyer Constraints (comma-separated)
+                </label>
+                <Input
+                  id="constraints"
+                  placeholder="e.g. SOC 2 Type II, SCIM provisioning, Slack bidirectional sync, under $40/user/mo"
+                  value={constraints}
+                  onChange={(e) => setConstraints(e.target.value)}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Specific architectural, compliance, or budget filters introduced in later turns.
+                </p>
+              </div>
 
-            {/* Submit */}
-            <div className="pt-2 flex items-center justify-end gap-3 border-t border-border">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/app/projects">Cancel</Link>
-              </Button>
-              <Button type="submit" size="sm" className="gap-1.5 font-medium" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Creating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    <span>Save Brand Project</span>
-                  </>
-                )}
-              </Button>
-            </div>
+              {/* Submit */}
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-border">
+                <Button asChild variant="outline" size="sm" disabled={loading}>
+                  <Link href="/app/projects" tabIndex={loading ? -1 : undefined} className={loading ? "pointer-events-none opacity-50" : ""}>
+                    Cancel
+                  </Link>
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="gap-1.5 font-medium select-none"
+                  disabled={loading}
+                  aria-disabled={loading}
+                >
+                  {loading ? (
+                    <span className="inline-flex items-center justify-center gap-1.5" role="status">
+                      <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                      <span>Creating...</span>
+                    </span>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      <span>Save Brand Project</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </fieldset>
           </form>
         </CardContent>
       </Card>
