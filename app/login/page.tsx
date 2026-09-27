@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 function LoginForm() {
   const router = useRouter();
@@ -160,7 +161,7 @@ function LoginForm() {
               >
                 {loading ? (
                   <span className="inline-flex items-center justify-center gap-2" role="status">
-                    <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                    <Spinner className="h-4 w-4" />
                     <span>Signing in...</span>
                   </span>
                 ) : (
@@ -194,7 +195,7 @@ export default function LoginPage() {
       <React.Suspense
         fallback={
           <div className="flex items-center justify-center p-8 text-xs text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mr-2 text-primary" />
+            <Spinner className="h-5 w-5 mr-2 text-primary" />
             <span>Loading sign in...</span>
           </div>
         }

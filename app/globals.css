@@ -144,6 +144,36 @@
   animation: indeterminate-rail 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+/* Dedicated ConsiderIQ Continuous Hardware-Accelerated Loading Animation */
+@keyframes consideriq-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes consideriq-pulse-opacity {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.consideriq-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: consideriq-spin 0.85s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Accessible Reduced-Motion Handling without UI Freezing */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -152,5 +182,18 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /*
+   * Essential loading indicator exception:
+   * Replaces continuous vestibular rotation with a gentle, non-motion opacity pulse.
+   * Prevents loading states from appearing dead or frozen.
+   */
+  .consideriq-spinner {
+    animation: consideriq-pulse-opacity 1.5s ease-in-out infinite !important;
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+    transform: none !important;
+    will-change: opacity !important;
   }
 }

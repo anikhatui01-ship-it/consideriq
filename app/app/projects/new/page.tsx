@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, AlertCircle, Sparkles } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -230,7 +231,7 @@ export default function NewProjectPage() {
                 >
                   {loading ? (
                     <span className="inline-flex items-center justify-center gap-1.5" role="status">
-                      <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                      <Spinner className="h-4 w-4" />
                       <span>Creating...</span>
                     </span>
                   ) : (

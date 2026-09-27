@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Play, Cpu, Loader2, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Play, Cpu, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -455,7 +456,7 @@ export function SimulationRunner({ projects, initialProjectId, apiEndpoint = "/a
                     {isComplete ? (
                       <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                     ) : isCurrentRunning ? (
-                      <Loader2 className="h-3 w-3 text-primary animate-spin" />
+                      <Spinner className="h-3 w-3 text-primary" />
                     ) : (
                       <span className="font-mono text-[10px] text-muted-foreground">{st.step}</span>
                     )}
@@ -499,7 +500,7 @@ export function SimulationRunner({ projects, initialProjectId, apiEndpoint = "/a
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium text-foreground flex items-center gap-2">
-                  <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" aria-hidden="true" />
+                  <Spinner className="h-3.5 w-3.5 text-primary" />
                   <span>{currentProgressMessage}</span>
                 </span>
                 <span className="text-[11px] text-muted-foreground font-mono">
@@ -682,7 +683,7 @@ export function SimulationRunner({ projects, initialProjectId, apiEndpoint = "/a
               </Badge>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground pl-6">
-              <Loader2 className="h-3 w-3 animate-spin shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <Spinner className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
               <span>Redirecting to Decision Trail...</span>
             </div>
           </div>
@@ -709,7 +710,7 @@ export function SimulationRunner({ projects, initialProjectId, apiEndpoint = "/a
           >
             {status === "running" ? (
               <span className="inline-flex items-center justify-center gap-1.5" role="status">
-                <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden="true" />
+                <Spinner className="h-3.5 w-3.5" />
                 <span>
                   {completedTurns.length > 0
                     ? `Turn ${Math.min(5, completedTurns.length + 1)}/5 (${String(elapsedSeconds).padStart(2, "0")}s)...`

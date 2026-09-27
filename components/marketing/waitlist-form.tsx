@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { CheckCircle2, ArrowRight, AlertCircle } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -260,7 +261,7 @@ export function WaitlistForm() {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Spinner className="h-4 w-4" />
                   <span>Submitting request...</span>
                 </>
               ) : (

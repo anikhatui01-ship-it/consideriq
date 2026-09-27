@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -185,12 +186,12 @@ export default function SignupPage() {
                   >
                     {navigating ? (
                       <span className="inline-flex items-center justify-center gap-2" role="status">
-                        <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                        <Spinner className="h-4 w-4" />
                         <span>Opening ConsiderIQ...</span>
                       </span>
                     ) : loading ? (
                       <span className="inline-flex items-center justify-center gap-2" role="status">
-                        <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />
+                        <Spinner className="h-4 w-4" />
                         <span>Creating account...</span>
                       </span>
                     ) : (

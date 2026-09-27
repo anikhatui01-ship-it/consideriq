@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -146,7 +147,7 @@ export default function ResetPasswordPage() {
                   >
                     {loading ? (
                       <span className="inline-flex items-center justify-center gap-2" role="status">
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Spinner className="mr-2 h-4 w-4" />
                         <span>Updating password...</span>
                       </span>
                     ) : (
